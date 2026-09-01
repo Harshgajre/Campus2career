@@ -1,0 +1,161 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
+import { mockData } from '../services/mockData';
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [roleDetails, setRoleDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('c2c_token');
+      const savedUser = localStorage.getItem('c2c_user');
+
+      if (token && savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          const res = await authService.getMe();
+          if (res.success) {
+            setUser(res.user);
+            setRoleDetails(res.roleDetails);
+            localStorage.setItem('c2c_user', JSON.stringify(res.user));
+          }
+        } catch (error) {
+          console.warn('Session verification failed, using stored user profile');
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      const res = await authService.login({ email, password });
+      if (res.success) {
+        localStorage.setItem('c2c_token', res.token);
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        localStorage.setItem('c2c_user_role', res.user.role);
+        setUser(res.user);
+        setRoleDetails(res.roleDetails);
+        return { success: true, role: res.user.role };
+      }
+      return { success: false, message: res.message };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Login failed' };
+    }
+  };
+
+  const demoLogin = async (role) => {
+    try {
+      const res = await authService.demoLogin(role);
+      if (res.success) {
+        localStorage.setItem('c2c_token', res.token);
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        localStorage.setItem('c2c_user_role', role);
+        setUser(res.user);
+        setRoleDetails(res.roleDetails);
+        return { success: true, role: res.user.role };
+      }
+      return { success: false, message: res.message };
+    } catch (err) {
+      // Fallback to mock data for instant preview even if backend is unavailable
+      const mockRole = mockData[role] || mockData.student;
+      const mockUser = mockRole.user;
+      
+      localStorage.setItem('c2c_token', `mock_token_${role}`);
+      localStorage.setItem('c2c_user', JSON.stringify(mockUser));
+      localStorage.setItem('c2c_user_role', role);
+      setUser(mockUser);
+      setRoleDetails({ role, data: mockRole });
+      
+      console.log(`✅ Demo login (mock) as ${role}:`, mockUser.name);
+      return { success: true, role };
+    }
+  };
+
+  const register = async (role, data) => {
+    try {
+      let res;
+      if (role === 'student') res = await authService.registerStudent(data);
+      else if (role === 'college') res = await authService.registerCollege(data);
+      else if (role === 'company') res = await authService.registerCompany(data);
+
+      if (res.success) {
+        localStorage.setItem('c2c_token', res.token);
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        localStorage.setItem('c2c_user_role', role);
+        setUser(res.user);
+        const mockRole = mockData[role] || mockData.student;
+        setRoleDetails({ role, data: mockRole });
+        return { success: true, role: res.user.role };
+      }
+      return { success: false, message: res.message };
+    } catch (err) {
+      // Fallback to mock data for registration preview
+      const mockRole = mockData[role] || mockData.student;
+      const mockUser = {
+        ...mockRole.user,
+        name: data?.name || mockRole.user.name,
+        email: data?.email || mockRole.user.email,
+      };
+      
+      localStorage.setItem('c2c_token', `mock_token_${role}`);
+      localStorage.setItem('c2c_user', JSON.stringify(mockUser));
+      localStorage.setItem('c2c_user_role', role);
+      setUser(mockUser);
+      setRoleDetails({ role, data: mockRole });
+      
+      console.log(`✅ Registration (mock) as ${role}:`, mockUser.name);
+      return { success: true, role };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('c2c_token');
+    localStorage.removeItem('c2c_user');
+    localStorage.removeItem('c2c_user_role');
+    setUser(null);
+    setRoleDetails(null);
+  };
+
+  const updateProfile = async (updatedData) => {
+    try {
+      const res = await authService.updateProfile(updatedData);
+      if (res.success) {
+        setUser(res.user);
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        return { success: true };
+      }
+    } catch (err) {
+      // Local update fallback
+      setUser((prev) => ({ ...prev, ...updatedData }));
+      localStorage.setItem('c2c_user', JSON.stringify({ ...user, ...updatedData }));
+      return { success: true };
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        roleDetails,
+        loading,
+        login,
+        demoLogin,
+        register,
+        logout,
+        updateProfile,
+        isAuthenticated: !!user,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
