@@ -1,10 +1,8 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Award, GraduationCap, Building2, ArrowRight } from 'lucide-react';
 
-export const LandingPage = () => {
-  const navigate = useNavigate();
-
+export const MainWelcomePage = () => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       {/* Main Content - Hero Section */}
@@ -106,69 +104,6 @@ export const LandingPage = () => {
                 <ArrowRight className="w-4 h-4" />
               </div>
             </Link>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
-                <GraduationCap className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                College Panel
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Track batch competency analytics, identify industry skill gaps, schedule bootcamps, and manage placements.
-              </p>
-            </div>
-            <button
-              onClick={() => handleQuickDemo('college')}
-              className="mt-6 flex items-center gap-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:gap-2 transition-all"
-            >
-              Open College Portal <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Company Card */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-emerald-500/60 transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Company Panel
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Post internships & jobs, search talent based on verified skill scores, sponsor challenges, and conduct interviews.
-              </p>
-            </div>
-            <button
-              onClick={() => handleQuickDemo('company')}
-              className="mt-6 flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:gap-2 transition-all"
-            >
-              Open Company Portal <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Admin Card */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-orange-500/60 transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Admin Panel
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Oversee platform ecosystem growth, moderate catalogs, manage onboarding approvals, and audit platform KPIs.
-              </p>
-            </div>
-            <button
-              onClick={() => handleQuickDemo('admin')}
-              className="mt-6 flex items-center gap-1 text-xs font-semibold text-orange-500 hover:gap-2 transition-all"
-            >
-              Open Admin Portal <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </section>

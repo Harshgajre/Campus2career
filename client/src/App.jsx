@@ -7,7 +7,7 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import { PublicLayout } from './layouts/PublicLayout';
 
 // Public Pages
-import { LandingPage } from './pages/public/LandingPage';
+import { MainWelcomePage } from './pages/public/MainWelcomePage';
 import { LoginPage } from './pages/public/LoginPage';
 import { RegisterStudentPage } from './pages/public/RegisterStudentPage';
 import { RegisterCollegePage } from './pages/public/RegisterCollegePage';
@@ -121,7 +121,7 @@ export default function App() {
     <Routes>
       {/* ── Public Routes ─────────────────────────────── */}
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<MainWelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register/student" element={<RegisterStudentPage />} />
         <Route path="/register/college" element={<RegisterCollegePage />} />
