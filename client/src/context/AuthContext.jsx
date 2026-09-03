@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
-import { mockData } from '../services/mockData';
 
 const AuthContext = createContext();
 
@@ -24,7 +23,11 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('c2c_user', JSON.stringify(res.user));
           }
         } catch (error) {
-          console.warn('Session verification failed, using stored user profile');
+          localStorage.removeItem('c2c_token');
+          localStorage.removeItem('c2c_user');
+          localStorage.removeItem('c2c_user_role');
+          setUser(null);
+          setRoleDetails(null);
         }
       }
       setLoading(false);
@@ -63,18 +66,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: res.message };
     } catch (err) {
-      // Fallback to mock data for instant preview even if backend is unavailable
-      const mockRole = mockData[role] || mockData.student;
-      const mockUser = mockRole.user;
-      
-      localStorage.setItem('c2c_token', `mock_token_${role}`);
-      localStorage.setItem('c2c_user', JSON.stringify(mockUser));
-      localStorage.setItem('c2c_user_role', role);
-      setUser(mockUser);
-      setRoleDetails({ role, data: mockRole });
-      
-      console.log(`✅ Demo login (mock) as ${role}:`, mockUser.name);
-      return { success: true, role };
+      return { success: false, message: err.response?.data?.message || 'Backend is unavailable' };
     }
   };
 
@@ -96,22 +88,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: res.message };
     } catch (err) {
-      // Fallback to mock data for registration preview
-      const mockRole = mockData[role] || mockData.student;
-      const mockUser = {
-        ...mockRole.user,
-        name: data?.name || mockRole.user.name,
-        email: data?.email || mockRole.user.email,
-      };
-      
-      localStorage.setItem('c2c_token', `mock_token_${role}`);
-      localStorage.setItem('c2c_user', JSON.stringify(mockUser));
-      localStorage.setItem('c2c_user_role', role);
-      setUser(mockUser);
-      setRoleDetails({ role, data: mockRole });
-      
-      console.log(`✅ Registration (mock) as ${role}:`, mockUser.name);
-      return { success: true, role };
+      return { success: false, message: err.response?.data?.message || 'Backend is unavailable' };
     }
   };
 

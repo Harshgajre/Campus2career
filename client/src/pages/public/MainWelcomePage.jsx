@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Award, GraduationCap, Building2, ArrowRight } from 'lucide-react';
+import campusCareerBridge from '../../assets/campus-career-bridge.svg';
 
 export const MainWelcomePage = () => {
   return (
@@ -14,8 +15,14 @@ export const MainWelcomePage = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight sm:leading-tight mb-6">
-            Welcome to Campus2Career
+            Welcome to
           </h1>
+
+          <img
+            src={campusCareerBridge}
+            alt="Campus Career bridge"
+            className="w-full max-w-3xl h-auto mx-auto mb-6 object-contain"
+          />
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed mb-16">

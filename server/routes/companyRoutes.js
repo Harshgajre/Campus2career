@@ -10,13 +10,15 @@ const {
   getActiveInterns,
 } = require('../controllers/companyController');
 const { protect } = require('../middleware/authMiddleware');
+const { authorize } = require('../middleware/roleMiddleware');
 
-router.get('/dashboard', protect, getCompanyDashboard);
-router.get('/opportunities', protect, getCompanyOpportunities);
-router.post('/opportunities', protect, createOpportunity);
-router.get('/candidates', protect, searchCandidates);
-router.get('/interviews', protect, getCompanyInterviews);
-router.post('/interviews', protect, scheduleInterview);
-router.get('/interns', protect, getActiveInterns);
+router.use(protect, authorize('company'));
+router.get('/dashboard', getCompanyDashboard);
+router.get('/opportunities', getCompanyOpportunities);
+router.post('/opportunities', createOpportunity);
+router.get('/candidates', searchCandidates);
+router.get('/interviews', getCompanyInterviews);
+router.post('/interviews', scheduleInterview);
+router.get('/interns', getActiveInterns);
 
 module.exports = router;

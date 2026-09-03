@@ -11,14 +11,16 @@ const {
   getAnalyticsReports,
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
+const { authorize } = require('../middleware/roleMiddleware');
 
-router.get('/dashboard', protect, getAdminDashboard);
-router.get('/students', protect, getAdminStudents);
-router.get('/companies', protect, getAdminCompanies);
-router.get('/colleges', protect, getAdminColleges);
-router.get('/skills', protect, getAdminSkills);
-router.post('/skills', protect, createAdminSkill);
-router.delete('/skills/:id', protect, deleteAdminSkill);
-router.get('/analytics-reports', protect, getAnalyticsReports);
+router.use(protect, authorize('admin'));
+router.get('/dashboard', getAdminDashboard);
+router.get('/students', getAdminStudents);
+router.get('/companies', getAdminCompanies);
+router.get('/colleges', getAdminColleges);
+router.get('/skills', getAdminSkills);
+router.post('/skills', createAdminSkill);
+router.delete('/skills/:id', deleteAdminSkill);
+router.get('/analytics-reports', getAnalyticsReports);
 
 module.exports = router;

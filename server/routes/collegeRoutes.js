@@ -11,14 +11,16 @@ const {
   getCollegePlacements,
 } = require('../controllers/collegeController');
 const { protect } = require('../middleware/authMiddleware');
+const { authorize } = require('../middleware/roleMiddleware');
 
-router.get('/dashboard', protect, getCollegeDashboard);
-router.get('/students', protect, getCollegeStudents);
-router.get('/analytics', protect, getCollegeSkillAnalytics);
-router.get('/skill-gap', protect, getSkillGap);
-router.get('/training-programs', protect, getTrainingPrograms);
-router.post('/training-programs', protect, createTrainingProgram);
-router.get('/collaborations', protect, getIndustryCollaborations);
-router.get('/placements', protect, getCollegePlacements);
+router.use(protect, authorize('college'));
+router.get('/dashboard', getCollegeDashboard);
+router.get('/students', getCollegeStudents);
+router.get('/analytics', getCollegeSkillAnalytics);
+router.get('/skill-gap', getSkillGap);
+router.get('/training-programs', getTrainingPrograms);
+router.post('/training-programs', createTrainingProgram);
+router.get('/collaborations', getIndustryCollaborations);
+router.get('/placements', getCollegePlacements);
 
 module.exports = router;

@@ -29,6 +29,9 @@ API.interceptors.response.use(
       console.warn('⚠️ Backend unavailable. Using mock data for:', error.config?.url);
       
       const url = error.config?.url || '';
+      if (url.includes('/auth/')) {
+        return Promise.reject(error);
+      }
       let mockResponse = null;
 
       // Match URL patterns to return appropriate mock data

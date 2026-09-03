@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, LogIn, Sparkles, Award, GraduationCap, Building2, ShieldAlert, ArrowRight } from 'lucide-react';
+import { Mail, Lock, LogIn, Award, GraduationCap, Building2, ShieldAlert } from 'lucide-react';
+import campusCareerBridge from '../../assets/campus-career-bridge.svg';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -38,12 +39,26 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8">
+    <div className="relative min-h-[85vh] overflow-hidden flex items-center justify-center px-4 py-12 sm:p-6 bg-[#f7f6ff] dark:bg-[#030622]">
+      <div className="absolute inset-0 pointer-events-none opacity-70 dark:opacity-80">
+        <div className="absolute -top-56 left-1/2 -translate-x-1/2 w-[760px] h-[430px] rounded-[50%] border border-indigo-200/70 dark:border-blue-500/20" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1040px] h-[560px] rounded-[50%] border border-indigo-200/50 dark:border-cyan-400/10" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-indigo-300/20 dark:bg-blue-600/15 blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[680px] h-40 bg-cyan-400/10 dark:bg-cyan-400/10 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        <img
+          src={campusCareerBridge}
+          alt="Campus Career bridge"
+          className="w-full h-auto mb-5 object-contain drop-shadow-[0_8px_18px_rgba(37,99,235,0.2)] dark:drop-shadow-[0_8px_24px_rgba(6,182,212,0.35)]"
+        />
+
+      <div className="w-full bg-white/90 dark:bg-[#07102d]/90 border border-indigo-100 dark:border-blue-500/40 rounded-2xl shadow-[0_18px_55px_rgba(79,70,229,0.14)] dark:shadow-[0_18px_55px_rgba(0,0,0,0.48)] backdrop-blur-sm p-6 sm:p-8">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold mb-3 shadow-md">
-            C2C
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 text-white font-bold mb-3 shadow-md shadow-blue-500/30">
+            <LogIn className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
             Welcome Back
@@ -54,7 +69,7 @@ export const LoginPage = () => {
         </div>
 
         {/* Demo 1-Click Login Quick Switcher */}
-        <div className="mb-6 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
+        <div className="mb-6 p-3 rounded-xl bg-indigo-50/70 dark:bg-[#0b1740]/80 border border-indigo-100 dark:border-blue-500/20">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block text-center mb-2 uppercase tracking-wider">
             ⚡ Quick Demo 1-Click Sign-In
           </span>
@@ -157,6 +172,7 @@ export const LoginPage = () => {
             <Link to="/register/company" className="hover:underline">Company</Link>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
