@@ -33,13 +33,13 @@ export const MainWelcomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {/* Student Option */}
             <Link
-              to="/login"
-              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-blue-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
+              to="/login/student"
+              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-emerald-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
             >
               {/* Card Glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
 
-              <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Award className="w-8 h-8" />
               </div>
 
@@ -52,7 +52,7 @@ export const MainWelcomePage = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </div>
@@ -60,26 +60,26 @@ export const MainWelcomePage = () => {
 
             {/* College Option */}
             <Link
-              to="/login"
-              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-purple-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
+              to="/login/college"
+              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-blue-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
             >
               {/* Card Glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-50 to-transparent dark:from-purple-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
 
-              <div className="w-16 h-16 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <GraduationCap className="w-8 h-8" />
               </div>
 
               <div>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                  College
+                  College / University
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   Manage students, track skills, and bridge the industry gap.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </div>
@@ -87,8 +87,8 @@ export const MainWelcomePage = () => {
 
             {/* Company Option */}
             <Link
-              to="/login"
-              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-emerald-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
+              to="/login/industry"
+              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-purple-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
             >
               {/* Card Glow */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />

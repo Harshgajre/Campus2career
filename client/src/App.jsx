@@ -9,6 +9,10 @@ import { PublicLayout } from './layouts/PublicLayout';
 // Public Pages
 import { MainWelcomePage } from './pages/public/MainWelcomePage';
 import { LoginPage } from './pages/public/LoginPage';
+import { StudentLoginPage } from './pages/public/StudentLoginPage';
+import { CollegeLoginPage } from './pages/public/CollegeLoginPage';
+import { IndustryLoginPage } from './pages/public/IndustryLoginPage';
+import { AllLoginReferenceGridPage } from './pages/public/AllLoginReferenceGridPage';
 import { RegisterStudentPage } from './pages/public/RegisterStudentPage';
 import { RegisterCollegePage } from './pages/public/RegisterCollegePage';
 import { RegisterCompanyPage } from './pages/public/RegisterCompanyPage';
@@ -122,7 +126,14 @@ export default function App() {
       {/* ── Public Routes ─────────────────────────────── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<MainWelcomePage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<StudentLoginPage />} />
+        <Route path="/login/student" element={<StudentLoginPage />} />
+        <Route path="/login/college" element={<CollegeLoginPage />} />
+        <Route path="/login/university" element={<CollegeLoginPage />} />
+        <Route path="/login/industry" element={<IndustryLoginPage />} />
+        <Route path="/login/company" element={<IndustryLoginPage />} />
+        <Route path="/login/reference-grid" element={<AllLoginReferenceGridPage />} />
+        <Route path="/login/switcher" element={<LoginPage />} />
         <Route path="/register/student" element={<RegisterStudentPage />} />
         <Route path="/register/college" element={<RegisterCollegePage />} />
         <Route path="/register/company" element={<RegisterCompanyPage />} />

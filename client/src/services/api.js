@@ -29,7 +29,7 @@ API.interceptors.response.use(
       console.warn('⚠️ Backend unavailable. Using mock data for:', error.config?.url);
       
       const url = error.config?.url || '';
-      if (url.includes('/auth/')) {
+      if (url.includes('/auth/') && !url.includes('/auth/demo-login') && !url.includes('/auth/me') && !url.includes('/auth/login')) {
         return Promise.reject(error);
       }
       let mockResponse = null;
@@ -105,9 +105,20 @@ API.interceptors.response.use(
         mockResponse = mockData.public.opportunities;
       } else if (url.includes('/challenges')) {
         mockResponse = mockData.public.challenges;
-      } else if (url.includes('/auth/demo-login')) {
-        // Handle demo login with mock data
-        const role = error.config?.data ? JSON.parse(error.config.data).role : 'student';
+      } else if (url.includes('/auth/demo-login') || url.includes('/auth/login')) {
+        // Handle demo or direct login with mock data when backend is offline
+        let role = 'student';
+        if (error.config?.data) {
+          try {
+            const parsed = JSON.parse(error.config.data);
+            if (parsed.role) role = parsed.role;
+            else if (parsed.email) {
+              if (parsed.email.includes('college') || parsed.email.includes('univ')) role = 'college';
+              else if (parsed.email.includes('company') || parsed.email.includes('industry')) role = 'company';
+              else if (parsed.email.includes('admin')) role = 'admin';
+            }
+          } catch(e) {}
+        }
         const mockRole = mockData[role] || mockData.student;
         mockResponse = {
           success: true,
