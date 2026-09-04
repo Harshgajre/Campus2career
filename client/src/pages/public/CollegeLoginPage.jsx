@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Mail, Lock, Eye, EyeOff, Building2 } from 'lucide-react';
 import universityHeroLight from '../../assets/university_hero_light.jpg';
+import universityHeroDark from '../../assets/university_hero_dark.jpg';
 
 export const CollegeLoginPage = () => {
   const navigate = useNavigate();
   const { login, demoLogin } = useAuth();
+  const { isDark } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,13 +49,13 @@ export const CollegeLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7FF] text-slate-900 font-sans">
+    <div className="min-h-screen bg-[#F4F7FF] dark:bg-[#020E1D] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
 
       {/* ── Main Container ───────────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center min-h-screen">
 
         {/* Main Card Container */}
-        <div className="w-full rounded-3xl p-6 sm:p-10 border border-slate-100 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.06)]">
+        <div className="w-full rounded-3xl p-6 sm:p-10 border border-slate-100 dark:border-slate-800 bg-white dark:bg-[#061A2C] shadow-[0_20px_60px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)] transition-colors duration-200">
 
           {/* Header Brand Logo */}
           <div className="flex flex-col items-center justify-center mb-8">
@@ -74,7 +77,7 @@ export const CollegeLoginPage = () => {
               <div>
                 {/* Pill Tag */}
                 <div className="inline-block mb-4">
-                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#EBF4FF] text-[#1D70F5]">
+                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#EBF4FF] dark:bg-blue-950/70 text-[#1D70F5] dark:text-blue-300">
                     For Universities
                   </span>
                 </div>
@@ -86,7 +89,7 @@ export const CollegeLoginPage = () => {
                 </h2>
 
                 {/* Subtitle */}
-                <p className="text-sm sm:text-base leading-relaxed max-w-lg mb-6 text-slate-600">
+                <p className="text-sm sm:text-base leading-relaxed max-w-lg mb-6 text-slate-600 dark:text-slate-300">
                   Track progress, bridge skill gaps, and empower students for a better tomorrow.
                 </p>
               </div>
@@ -94,7 +97,7 @@ export const CollegeLoginPage = () => {
               {/* Artwork Illustration */}
               <div className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-200/50 group">
                 <img
-                  src={universityHeroLight}
+                  src={isDark ? universityHeroDark : universityHeroLight}
                   alt="University Campus Building Illustration"
                   className="w-full h-56 sm:h-64 lg:h-72 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -107,11 +110,11 @@ export const CollegeLoginPage = () => {
 
             {/* ── RIGHT LOGIN FORM COLUMN ────────────────────────── */}
             <div className="lg:col-span-5">
-              <div className="w-full rounded-2xl p-6 sm:p-8 border border-slate-200/80 bg-white shadow-xl text-slate-900">
+              <div className="w-full rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-[#0B2539] shadow-xl dark:shadow-[0_18px_45px_rgba(0,0,0,0.4)] text-slate-900 dark:text-slate-100 transition-colors duration-200">
 
                 {/* Top Icon Badge */}
                 <div className="flex justify-center mb-4">
-                  <div className="w-14 h-14 rounded-full bg-[#EBF4FF] flex items-center justify-center text-[#1D70F5] shadow-inner">
+                  <div className="w-14 h-14 rounded-full bg-[#EBF4FF] dark:bg-blue-950/70 flex items-center justify-center text-[#1D70F5] dark:text-blue-300 shadow-inner">
                     <Building2 className="w-7 h-7" />
                   </div>
                 </div>
@@ -121,14 +124,14 @@ export const CollegeLoginPage = () => {
                   <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
                     University Login
                   </h3>
-                  <p className="text-xs mt-1 text-slate-500">
+                  <p className="text-xs mt-1 text-slate-500 dark:text-slate-400">
                     Welcome back! Sign in to manage your institution.
                   </p>
                 </div>
 
                 {/* Error Banner */}
                 {error && (
-                  <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-medium">
+                  <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-medium">
                     {error}
                   </div>
                 )}
@@ -146,7 +149,7 @@ export const CollegeLoginPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D70F5] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D70F5] transition-all"
                       required
                     />
                   </div>
@@ -161,13 +164,13 @@ export const CollegeLoginPage = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D70F5] transition-all"
+                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D70F5] transition-all"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -180,9 +183,9 @@ export const CollegeLoginPage = () => {
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-300 text-[#1D70F5] focus:ring-[#1D70F5]"
+                        className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-[#1D70F5] focus:ring-[#1D70F5]"
                       />
-                      <span className="text-slate-600">Remember me</span>
+                      <span className="text-slate-600 dark:text-slate-300">Remember me</span>
                     </label>
                     <a
                       href="#forgot"
@@ -209,7 +212,7 @@ export const CollegeLoginPage = () => {
 
                 {/* Registration Link */}
                 <div className="text-center mt-4 text-xs">
-                  <span className="text-slate-500">Don't have an account? </span>
+                  <span className="text-slate-500 dark:text-slate-400">Don't have an account? </span>
                   <Link to="/register/college" className="font-bold text-[#1D70F5] hover:underline">
                     Register here
                   </Link>
@@ -218,10 +221,10 @@ export const CollegeLoginPage = () => {
                 {/* Divider */}
                 <div className="relative my-5">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200" />
+                    <div className="w-full border-t border-slate-200 dark:border-slate-700" />
                   </div>
                   <div className="relative flex justify-center text-[10px] uppercase">
-                    <span className="px-2 bg-white text-slate-400">or</span>
+                    <span className="px-2 bg-white dark:bg-[#0B2539] text-slate-400">or</span>
                   </div>
                 </div>
 
@@ -229,7 +232,7 @@ export const CollegeLoginPage = () => {
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm flex items-center justify-center gap-2.5 text-xs font-semibold transition-all"
+                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm flex items-center justify-center gap-2.5 text-xs font-semibold transition-all"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
