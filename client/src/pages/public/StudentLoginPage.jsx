@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Award, LockKeyhole, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { GraduationCap, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
-  AuthDivider,
   AuthError,
   AuthField,
   AuthInput,
-  GoogleButton,
+  ChangeAccountType,
   PasswordInput,
   RoleAuthLayout,
 } from '../../components/auth/RoleAuthLayout';
@@ -37,23 +36,14 @@ export const StudentLoginPage = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    const res = await demoLogin('student');
-    setLoading(false);
-    if (res.success) navigate('/student/dashboard');
-  };
-
   return (
     <RoleAuthLayout
       accent="bg-blue-600"
       accentSoft="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
-      badge="For Students"
+      role="student"
       title="Student Login"
       description="Continue your learning journey toward a brighter future."
-      icon={Award}
-      features={['Learn new skills', 'Track your progress', 'Explore opportunities']}
-      quote="Build Your Future Today!"
+      icon={GraduationCap}
     >
       <AuthError message={error} />
       <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -70,15 +60,11 @@ export const StudentLoginPage = () => {
           </label>
           <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Forgot password?</a>
         </div>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
-      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">
-        Don't have an account? <Link to="/register/student" className="font-bold text-blue-600 hover:underline dark:text-blue-400">Register here</Link>
-      </div>
-      <AuthDivider />
-      <GoogleButton onClick={handleGoogleLogin} />
+      <ChangeAccountType />
     </RoleAuthLayout>
   );
 };

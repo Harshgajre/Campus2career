@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BriefcaseBusiness, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
-  AuthDivider,
   AuthError,
   AuthField,
   AuthInput,
-  GoogleButton,
+  ChangeAccountType,
   PasswordInput,
   RoleAuthLayout,
 } from '../../components/auth/RoleAuthLayout';
@@ -37,23 +36,14 @@ export const IndustryLoginPage = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    const res = await demoLogin('company');
-    setLoading(false);
-    if (res.success) navigate('/company/dashboard');
-  };
-
   return (
     <RoleAuthLayout
       accent="bg-purple-600"
       accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
-      badge="For Industry"
+      role="industry"
       title="Industry Login"
       description="Discover talent, collaborate and create opportunities."
       icon={BriefcaseBusiness}
-      features={['Find skilled talent', 'Post opportunities', 'Collaborate with institutions']}
-      quote="Talent Builds Tomorrow!"
     >
       <AuthError message={error} />
       <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -74,11 +64,7 @@ export const IndustryLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
-      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">
-        Don't have an account? <Link to="/register/company" className="font-bold text-purple-600 hover:underline dark:text-purple-400">Register here</Link>
-      </div>
-      <AuthDivider />
-      <GoogleButton onClick={handleGoogleLogin} />
+      <ChangeAccountType />
     </RoleAuthLayout>
   );
 };
