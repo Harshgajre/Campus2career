@@ -1,183 +1,61 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BriefcaseBusiness, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { Building2 } from 'lucide-react';
+import {
+  AuthError,
+  AuthField,
+  AuthInput,
+  AuthSelect,
+  PasswordInput,
+  RoleAuthLayout,
+} from '../../components/auth/RoleAuthLayout';
 
 export const RegisterCompanyPage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    companyName: '',
-    industryType: 'Information Technology & Software',
-    location: 'Bangalore, India',
-    website: '',
-  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', companyName: '', industryType: 'Information Technology & Software', location: 'Bangalore, India', website: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const update = (field) => (event) => setFormData({ ...formData, [field]: event.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
     setLoading(true);
-
     const res = await register('company', formData);
     setLoading(false);
-
-    if (res.success) {
-      navigate('/company/dashboard');
-    } else {
-      setError(res.message || 'Registration failed');
-    }
+    if (res.success) navigate('/company/dashboard');
+    else setError(res.message || 'Registration failed');
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-lg bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold mb-2 shadow-md">
-            <Building2 className="w-5 h-5" />
-          </div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-            Company & Recruiter Registration
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Hire top pre-verified student talent directly with skill benchmarks
-          </p>
+    <RoleAuthLayout
+      accent="bg-purple-600"
+      accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
+      badge="For Industry"
+      title="Create your industry account"
+      description="Connect with skilled talent and build stronger teams."
+      icon={BriefcaseBusiness}
+      features={['Find verified talent', 'Post opportunities', 'Collaborate with institutions']}
+      quote="Talent Builds Tomorrow!"
+    >
+      <h2 className="mb-4 text-center text-lg font-extrabold tracking-tight text-slate-950 dark:text-white">Industry Registration</h2>
+      <AuthError message={error} />
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <AuthField label="Company Name"><AuthInput value={formData.companyName} onChange={update('companyName')} placeholder="Company name" required /></AuthField>
+          <AuthField label="Recruiter / HR Name"><AuthInput icon={User} value={formData.name} onChange={update('name')} placeholder="Full name" required /></AuthField>
+          <AuthField label="Corporate Email"><AuthInput icon={Mail} type="email" value={formData.email} onChange={update('email')} placeholder="name@company.com" required /></AuthField>
+          <AuthField label="Password"><PasswordInput value={formData.password} onChange={update('password')} placeholder="Create a password" showPassword={showPassword} onToggle={() => setShowPassword(!showPassword)} required /></AuthField>
+          <AuthField label="Industry Domain"><AuthSelect value={formData.industryType} onChange={update('industryType')}><option>Information Technology & Software</option><option>Fintech & Banking</option><option>AI & Machine Learning</option><option>Healthcare & Biotech</option><option>E-commerce & Retail</option></AuthSelect></AuthField>
+          <AuthField label="Headquarters Location"><AuthInput value={formData.location} onChange={update('location')} placeholder="Bangalore, India" required /></AuthField>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-medium">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Company Name
-              </label>
-              <input
-                type="text"
-                placeholder="TechCorp Solutions"
-                value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Recruiter / HR Name
-              </label>
-              <input
-                type="text"
-                placeholder="Riya Patel"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Official Corporate Email
-              </label>
-              <input
-                type="email"
-                placeholder="riya@techcorp.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Industry Domain
-              </label>
-              <select
-                value={formData.industryType}
-                onChange={(e) => setFormData({ ...formData, industryType: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option>Information Technology & Software</option>
-                <option>Fintech & Banking</option>
-                <option>AI & Machine Learning</option>
-                <option>Healthcare & Biotech</option>
-                <option>E-commerce & Retail</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Headquarters Location
-              </label>
-              <input
-                type="text"
-                placeholder="Bangalore, India"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Company Website URL
-            </label>
-            <input
-              type="url"
-              placeholder="https://techcorp.example.com"
-              value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-500/20"
-          >
-            {loading ? 'Creating Recruiter Portal...' : 'Register Company Account'}
-          </button>
-        </form>
-
-        <div className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
-          Already registered?{' '}
-          <Link to="/login" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
-            Sign In
-          </Link>
-        </div>
-      </div>
-    </div>
+        <AuthField label="Company Website"><AuthInput type="url" value={formData.website} onChange={update('website')} placeholder="https://company.example.com" /></AuthField>
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Industry Account'}</button>
+      </form>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/industry" className="font-bold text-purple-600 hover:underline dark:text-purple-400">Sign In</Link></div>
+    </RoleAuthLayout>
   );
 };

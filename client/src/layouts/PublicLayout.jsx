@@ -8,8 +8,10 @@ import { ProfileModal } from '../components/common/ProfileModal';
 export const PublicLayout = () => {
   const { theme, toggleTheme, isDark } = useTheme();
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+  const authPaths = ['/login', '/login/student', '/login/college', '/login/university', '/login/industry', '/login/company', '/register/student', '/register/college', '/register/company'];
+  const isAuthPage = authPaths.includes(location.pathname);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const dropdownRef = useRef(null);
@@ -36,8 +38,7 @@ export const PublicLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200 selection:bg-blue-500 selection:text-white">
-      {/* Public Navbar */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0E172E]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+      {!isAuthPage && <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0E172E]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 group-hover:scale-105 transition-transform">
@@ -59,17 +60,7 @@ export const PublicLayout = () => {
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
 
-            {/* Not Logged In - Show Sign In */}
-            {!user ? (
-              location.pathname !== '/login' && (
-                <Link
-                  to="/login"
-                  className="text-xs font-semibold px-3.5 py-2 text-slate-700 dark:text-slate-200 hover:text-blue-600 transition-colors"
-                >
-                  Sign In
-                </Link>
-              )
-            ) : (
+            {user && (
               /* Logged In - Show Profile Avatar and Name */
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -143,7 +134,7 @@ export const PublicLayout = () => {
             )}
           </div>
         </div>
-      </header>
+      </header>}
 
       {/* Main Public Body */}
       <main className="flex-1">
@@ -158,8 +149,7 @@ export const PublicLayout = () => {
         />
       )}
 
-      {/* Public Footer */}
-      <footer className="bg-white dark:bg-[#0E172E] border-t border-slate-200/80 dark:border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">
+      {!isAuthPage && <footer className="bg-white dark:bg-[#0E172E] border-t border-slate-200/80 dark:border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-700 dark:text-slate-200">Campus2Career</span>
@@ -167,7 +157,7 @@ export const PublicLayout = () => {
           </div>
           <p>© 2026 Campus2Career Platform. Built for Students, Colleges, Companies & Administrators.</p>
         </div>
-      </footer>
+      </footer>}
     </div>
   );
 };

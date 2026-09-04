@@ -1,168 +1,62 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Building2, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { GraduationCap } from 'lucide-react';
+import {
+  AuthError,
+  AuthField,
+  AuthInput,
+  AuthSelect,
+  PasswordInput,
+  RoleAuthLayout,
+} from '../../components/auth/RoleAuthLayout';
 
 export const RegisterCollegePage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    institutionName: '',
-    code: '',
-    university: '',
-    state: 'Maharashtra',
-    city: 'Pune',
-  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', institutionName: '', code: '', university: '', state: 'Maharashtra', city: 'Pune' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const update = (field) => (event) => setFormData({ ...formData, [field]: event.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
     setLoading(true);
-
     const res = await register('college', formData);
     setLoading(false);
-
-    if (res.success) {
-      navigate('/college/dashboard');
-    } else {
-      setError(res.message || 'Registration failed');
-    }
+    if (res.success) navigate('/college/dashboard');
+    else setError(res.message || 'Registration failed');
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-lg bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-purple-600 text-white font-bold mb-2 shadow-md">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-            College / Institution Onboarding
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Empower your campus with cohort analytics and industry MoUs
-          </p>
+    <RoleAuthLayout
+      accent="bg-emerald-500"
+      accentSoft="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
+      badge="For Universities"
+      title="Set up your university portal"
+      description="Empower your campus with student insights and industry connections."
+      icon={Building2}
+      features={['Manage student cohorts', 'Track skill gaps', 'Build industry partnerships']}
+      quote="Education Creates Opportunities..."
+    >
+      <h2 className="mb-4 text-center text-lg font-extrabold tracking-tight text-slate-950 dark:text-white">University Registration</h2>
+      <AuthError message={error} />
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <AuthField label="Institution Name"><AuthInput value={formData.institutionName} onChange={update('institutionName')} placeholder="Institution name" required /></AuthField>
+          <AuthField label="College AISHE / Code"><AuthInput value={formData.code} onChange={update('code')} placeholder="AIT-4110" required /></AuthField>
+          <AuthField label="Authorized Official"><AuthInput icon={User} value={formData.name} onChange={update('name')} placeholder="Official name" required /></AuthField>
+          <AuthField label="Official Email"><AuthInput icon={Mail} type="email" value={formData.email} onChange={update('email')} placeholder="official@university.edu" required /></AuthField>
+          <AuthField label="Password"><PasswordInput value={formData.password} onChange={update('password')} placeholder="Create a password" showPassword={showPassword} onToggle={() => setShowPassword(!showPassword)} required /></AuthField>
+          <AuthField label="Affiliated University"><AuthInput value={formData.university} onChange={update('university')} placeholder="University name" required /></AuthField>
+          <AuthField label="State"><AuthInput value={formData.state} onChange={update('state')} placeholder="State" required /></AuthField>
+          <AuthField label="City"><AuthInput value={formData.city} onChange={update('city')} placeholder="City" required /></AuthField>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-medium">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Institution Name
-              </label>
-              <input
-                type="text"
-                placeholder="Apex Institute of Technology"
-                value={formData.institutionName}
-                onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                College AISHE / Code
-              </label>
-              <input
-                type="text"
-                placeholder="AIT-4110"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Authorized Official Name
-              </label>
-              <input
-                type="text"
-                placeholder="Dr. Mehta"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Official Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="dean.placements@apex.edu"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Affiliated University
-              </label>
-              <input
-                type="text"
-                placeholder="State Technological University"
-                value={formData.university}
-                onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-md shadow-purple-500/20"
-          >
-            {loading ? 'Submitting Application...' : 'Register College Portal'}
-          </button>
-        </form>
-
-        <div className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
-          Already registered?{' '}
-          <Link to="/login" className="font-semibold text-purple-600 dark:text-purple-400 hover:underline">
-            Sign In
-          </Link>
-        </div>
-      </div>
-    </div>
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-emerald-500 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:opacity-50">{loading ? 'Creating portal...' : 'Create University Portal'}</button>
+      </form>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/college" className="font-bold text-emerald-600 hover:underline dark:text-emerald-400">Sign In</Link></div>
+    </RoleAuthLayout>
   );
 };
