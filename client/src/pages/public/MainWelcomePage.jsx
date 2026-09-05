@@ -7,7 +7,7 @@ export const MainWelcomePage = () => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       {/* Main Content - Hero Section */}
-      <section className="flex-1 relative overflow-hidden py-20 lg:py-32 flex items-center">
+      <section className="flex-1 relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24 flex items-center">
         {/* Ambient glow elements */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/15 dark:bg-blue-600/10 blur-3xl rounded-full pointer-events-none -z-10" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 blur-3xl rounded-full pointer-events-none -z-10" />
@@ -21,7 +21,7 @@ export const MainWelcomePage = () => {
           <img
             src={campusCareerBridge}
             alt="Campus Career bridge"
-            className="w-full max-w-3xl h-auto mx-auto mb-6 object-contain"
+            className="w-full max-w-4xl h-auto mx-auto mb-8 object-contain drop-shadow-sm"
           />
 
           {/* Subtitle */}
