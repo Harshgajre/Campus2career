@@ -153,7 +153,6 @@ export const PublicLayout = () => {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-700 dark:text-slate-200">Campus2Career</span>
-            <span>• SIH Finalist Career Ecosystem</span>
           </div>
           <p>© 2026 Campus2Career Platform. Built for Students, Colleges, Companies & Administrators.</p>
         </div>
