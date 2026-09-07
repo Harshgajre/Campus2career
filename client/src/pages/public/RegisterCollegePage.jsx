@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, Mail, User } from 'lucide-react';
+import { GraduationCap, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   AuthError,
@@ -37,7 +37,7 @@ export const RegisterCollegePage = () => {
       badge="For Universities"
       title="Set up your university portal"
       description="Empower your campus with student insights and industry connections."
-      icon={Building2}
+      icon={GraduationCap}
       features={['Manage student cohorts', 'Track skill gaps', 'Build industry partnerships']}
       quote="Education Creates Opportunities..."
     >

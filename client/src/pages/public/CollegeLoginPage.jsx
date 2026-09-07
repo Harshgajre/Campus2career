@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Mail } from 'lucide-react';
+import { GraduationCap, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   AuthError,
@@ -43,7 +43,7 @@ export const CollegeLoginPage = () => {
       role="college"
       title="University Login"
       description="Manage your institution and empower your students."
-      icon={Building2}
+      icon={GraduationCap}
     >
       <AuthError message={error} />
       <form onSubmit={handleSubmit} className="space-y-3.5">

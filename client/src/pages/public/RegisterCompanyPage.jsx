@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BriefcaseBusiness, Mail, User } from 'lucide-react';
+import { Building2, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   AuthError,
@@ -37,7 +37,7 @@ export const RegisterCompanyPage = () => {
       badge="For Industry"
       title="Create your industry account"
       description="Connect with skilled talent and build stronger teams."
-      icon={BriefcaseBusiness}
+      icon={Building2}
       features={['Find verified talent', 'Post opportunities', 'Collaborate with institutions']}
       quote="Talent Builds Tomorrow!"
     >

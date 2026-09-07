@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BriefcaseBusiness, Mail } from 'lucide-react';
+import { Building2, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   AuthError,
@@ -43,7 +43,7 @@ export const IndustryLoginPage = () => {
       role="industry"
       title="Industry Login"
       description="Discover talent, collaborate and create opportunities."
-      icon={BriefcaseBusiness}
+      icon={Building2}
     >
       <AuthError message={error} />
       <form onSubmit={handleSubmit} className="space-y-3.5">
