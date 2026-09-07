@@ -32,8 +32,8 @@ export const RegisterCompanyPage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-purple-600"
-      accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
+      accent="bg-emerald-600"
+      accentSoft="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
       badge="For Industry"
       title="Create your industry account"
       description="Connect with skilled talent and build stronger teams."
@@ -53,9 +53,9 @@ export const RegisterCompanyPage = () => {
           <AuthField label="Headquarters Location"><AuthInput value={formData.location} onChange={update('location')} placeholder="Bangalore, India" required /></AuthField>
         </div>
         <AuthField label="Company Website"><AuthInput type="url" value={formData.website} onChange={update('website')} placeholder="https://company.example.com" /></AuthField>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Industry Account'}</button>
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Industry Account'}</button>
       </form>
-      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/industry" className="font-bold text-purple-600 hover:underline dark:text-purple-400">Sign In</Link></div>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/industry" className="font-bold text-emerald-600 hover:underline dark:text-emerald-400">Sign In</Link></div>
     </RoleAuthLayout>
   );
 };

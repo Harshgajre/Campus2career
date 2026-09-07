@@ -38,8 +38,8 @@ export const StudentLoginPage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-blue-600"
-      accentSoft="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
+      accent="bg-purple-600"
+      accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
       role="student"
       title="Student Login"
       description="Continue your learning journey toward a brighter future."
@@ -55,10 +55,10 @@ export const StudentLoginPage = () => {
         </AuthField>
         <div className="flex items-center justify-between pt-1 text-[10px]">
           <label className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
             Remember me
           </label>
-          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Forgot password?</a>
+          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-purple-600 hover:underline dark:text-purple-400">Forgot password?</a>
         </div>
         <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">
           {loading ? 'Signing in...' : 'Login'}

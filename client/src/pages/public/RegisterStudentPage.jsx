@@ -32,8 +32,8 @@ export const RegisterStudentPage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-blue-600"
-      accentSoft="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
+      accent="bg-purple-600"
+      accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
       badge="For Students"
       title="Create your student account"
       description="Build your skill passport and unlock verified career opportunities."
@@ -52,10 +52,10 @@ export const RegisterStudentPage = () => {
           <AuthField label="College / University"><AuthInput value={formData.collegeName} onChange={update('collegeName')} placeholder="Institution name" required /></AuthField>
           <AuthField label="Department"><AuthSelect value={formData.department} onChange={update('department')}><option>Computer Science</option><option>Information Technology</option><option>AI & Data Science</option><option>Electronics</option><option>Mechanical</option></AuthSelect></AuthField>
         </div>
-        <AuthField label="Short Bio"><textarea rows="2" value={formData.bio} onChange={update('bio')} placeholder="Tell us about your interests" className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/45 dark:text-slate-100 dark:placeholder-slate-500" /></AuthField>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Student Account'}</button>
+        <AuthField label="Short Bio"><textarea rows="2" value={formData.bio} onChange={update('bio')} placeholder="Tell us about your interests" className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 dark:border-slate-700 dark:bg-slate-950/45 dark:text-slate-100 dark:placeholder-slate-500" /></AuthField>
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Student Account'}</button>
       </form>
-      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/student" className="font-bold text-blue-600 hover:underline dark:text-blue-400">Sign In</Link></div>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/student" className="font-bold text-purple-600 hover:underline dark:text-purple-400">Sign In</Link></div>
     </RoleAuthLayout>
   );
 };

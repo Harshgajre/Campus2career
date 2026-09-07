@@ -32,8 +32,8 @@ export const RegisterCollegePage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-emerald-500"
-      accentSoft="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
+      accent="bg-blue-600"
+      accentSoft="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
       badge="For Universities"
       title="Set up your university portal"
       description="Empower your campus with student insights and industry connections."
@@ -54,9 +54,9 @@ export const RegisterCollegePage = () => {
           <AuthField label="State"><AuthInput value={formData.state} onChange={update('state')} placeholder="State" required /></AuthField>
           <AuthField label="City"><AuthInput value={formData.city} onChange={update('city')} placeholder="City" required /></AuthField>
         </div>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-emerald-500 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:opacity-50">{loading ? 'Creating portal...' : 'Create University Portal'}</button>
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50">{loading ? 'Creating portal...' : 'Create University Portal'}</button>
       </form>
-      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/college" className="font-bold text-emerald-600 hover:underline dark:text-emerald-400">Sign In</Link></div>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">Already registered? <Link to="/login/college" className="font-bold text-blue-600 hover:underline dark:text-blue-400">Sign In</Link></div>
     </RoleAuthLayout>
   );
 };

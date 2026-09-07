@@ -38,8 +38,8 @@ export const IndustryLoginPage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-purple-600"
-      accentSoft="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300"
+      accent="bg-emerald-600"
+      accentSoft="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
       role="industry"
       title="Industry Login"
       description="Discover talent, collaborate and create opportunities."
@@ -55,12 +55,12 @@ export const IndustryLoginPage = () => {
         </AuthField>
         <div className="flex items-center justify-between pt-1 text-[10px]">
           <label className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
+            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
             Remember me
           </label>
-          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-purple-600 hover:underline dark:text-purple-400">Forgot password?</a>
+          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">Forgot password?</a>
         </div>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-700 disabled:opacity-50">
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>

@@ -29,12 +29,12 @@ export const LandingPage = () => {
             {/* Student Option */}
             <Link
               to="/login"
-              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-blue-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
+              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-purple-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
             >
               {/* Card Glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-50 to-transparent dark:from-purple-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
 
-              <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Award className="w-8 h-8" />
               </div>
 
@@ -47,7 +47,7 @@ export const LandingPage = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
+              <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </div>
@@ -56,12 +56,12 @@ export const LandingPage = () => {
             {/* College Option */}
             <Link
               to="/login"
-              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-purple-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
+              className="group relative p-8 rounded-2xl bg-white dark:bg-[#111C38] border-2 border-slate-200/90 dark:border-slate-800 shadow-lg hover:shadow-xl hover:border-blue-500/60 transition-all duration-300 flex flex-col items-center gap-4 text-center cursor-pointer"
             >
               {/* Card Glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-50 to-transparent dark:from-purple-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
 
-              <div className="w-16 h-16 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <GraduationCap className="w-8 h-8" />
               </div>
 
@@ -74,7 +74,7 @@ export const LandingPage = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all mt-4">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </div>
@@ -111,7 +111,7 @@ export const LandingPage = () => {
       </section>
     </div>
   );
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
                 <GraduationCap className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -123,7 +123,7 @@ export const LandingPage = () => {
             </div>
             <button
               onClick={() => handleQuickDemo('college')}
-              className="mt-6 flex items-center gap-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:gap-2 transition-all"
+              className="mt-6 flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:gap-2 transition-all"
             >
               Open College Portal <ChevronRight className="w-4 h-4" />
             </button>

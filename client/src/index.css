@@ -17,15 +17,17 @@
       linear-gradient(180deg, #02021e 0%, #04052c 56%, #06001e 100%);
   }
 
-  .auth-page-industry {
+  .auth-page-industry,
+  .auth-page-company {
     --auth-role: #10b981;
   }
 
   .auth-page-student {
-    --auth-role: #6d28d9;
+    --auth-role: #9333ea;
   }
 
-  .auth-page-college {
+  .auth-page-college,
+  .auth-page-university {
     --auth-role: #2563eb;
   }
 

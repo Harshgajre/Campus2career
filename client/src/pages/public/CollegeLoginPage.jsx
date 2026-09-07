@@ -38,8 +38,8 @@ export const CollegeLoginPage = () => {
 
   return (
     <RoleAuthLayout
-      accent="bg-emerald-500"
-      accentSoft="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
+      accent="bg-blue-600"
+      accentSoft="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
       role="college"
       title="University Login"
       description="Manage your institution and empower your students."
@@ -55,12 +55,12 @@ export const CollegeLoginPage = () => {
         </AuthField>
         <div className="flex items-center justify-between pt-1 text-[10px]">
           <label className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
             Remember me
           </label>
-          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">Forgot password?</a>
+          <a href="#forgot" onClick={(event) => event.preventDefault()} className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Forgot password?</a>
         </div>
-        <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50">
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
