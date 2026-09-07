@@ -4,6 +4,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { Sun, Moon, LogOut, User, Settings } from 'lucide-react';
 import { ProfileModal } from '../components/common/ProfileModal';
+import c2cLogoLight from '../assets/c2c-logo-light.jpg';
+import c2cLogoDark from '../assets/c2c-logo-dark.jpg';
 
 export const PublicLayout = () => {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -41,9 +43,11 @@ export const PublicLayout = () => {
       {!isAuthPage && <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0E172E]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 group-hover:scale-105 transition-transform">
-              C2C
-            </div>
+            <img
+              src={isDark ? c2cLogoDark : c2cLogoLight}
+              alt="Campus2Career Logo"
+              className="w-8 h-8 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform"
+            />
             <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">
               Campus2Career
             </span>
