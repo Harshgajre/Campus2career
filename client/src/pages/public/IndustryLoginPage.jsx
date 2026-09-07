@@ -64,7 +64,7 @@ export const IndustryLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
-      <ChangeAccountType />
+      <ChangeAccountType role="industry" />
     </RoleAuthLayout>
   );
 };

@@ -103,10 +103,18 @@ export const AuthError = ({ message }) => message ? (
   <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-600 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400">{message}</div>
 ) : null;
 
-export const ChangeAccountType = () => (
-  <Link to="/" className="mt-5 flex items-center justify-center gap-1 text-[10px] font-semibold text-blue-600 hover:underline dark:text-purple-400">
-    <ArrowLeft className="h-3 w-3" /> Change account type
-  </Link>
-);
+export const ChangeAccountType = ({ role, className = '' }) => {
+  const roleColorClass = role === 'college'
+    ? 'text-blue-600 hover:underline dark:text-blue-400'
+    : role === 'company' || role === 'industry'
+    ? 'text-emerald-600 hover:underline dark:text-emerald-400'
+    : 'text-purple-600 hover:underline dark:text-purple-400';
+
+  return (
+    <Link to="/" className={`mt-5 flex items-center justify-center gap-1 text-[10px] font-semibold ${className || roleColorClass}`}>
+      <ArrowLeft className="h-3 w-3" /> Change account type
+    </Link>
+  );
+};
 
 export { Mail };

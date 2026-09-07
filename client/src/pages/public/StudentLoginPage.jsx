@@ -64,7 +64,7 @@ export const StudentLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
-      <ChangeAccountType />
+      <ChangeAccountType role="student" />
     </RoleAuthLayout>
   );
 };
