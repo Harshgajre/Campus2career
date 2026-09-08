@@ -2,10 +2,11 @@ import axios from 'axios';
 import { mockData } from './mockData';
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://campus2career-cluu.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false,
 });
 
 // Request interceptor to attach JWT Bearer token

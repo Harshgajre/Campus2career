@@ -1,4 +1,7 @@
 {
+  "env": {
+    "VITE_API_URL": "https://campus2career-cluu.onrender.com/api"
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
