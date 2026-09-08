@@ -81,9 +81,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('c2c_token', res.token);
         localStorage.setItem('c2c_user', JSON.stringify(res.user));
         localStorage.setItem('c2c_user_role', role);
-        setUser(res.user);
-        const mockRole = mockData[role] || mockData.student;
-        setRoleDetails({ role, data: mockRole });
+        setRoleDetails(res.roleDetails || res.student || res.college || res.company || null);
         return { success: true, role: res.user.role };
       }
       return { success: false, message: res.message };

@@ -4,8 +4,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { Sun, Moon, LogOut, User, Settings } from 'lucide-react';
 import { ProfileModal } from '../components/common/ProfileModal';
-import c2cLogoLight from '../assets/c2c-logo-light.jpg';
-import c2cLogoDark from '../assets/c2c-logo-dark.jpg';
+import c2cLogoLight from '../assets/c2c-logo-light.png';
+import c2cLogoDark from '../assets/c2c-logo-dark.png';
 
 export const PublicLayout = () => {
   const { theme, toggleTheme, isDark } = useTheme();

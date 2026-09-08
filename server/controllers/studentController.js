@@ -611,3 +611,81 @@ exports.applyOpportunity = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get Student Profile
+// @route   GET /api/students/profile
+// @access  Private (Student)
+exports.getStudentProfile = async (req, res, next) => {
+  try {
+    const student = await Student.findOne({ user: req.user.id }).populate('user', 'name email avatar phone status');
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+    res.status(200).json({ success: true, student });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Student Profile
+// @route   PUT /api/students/profile
+// @access  Private (Student)
+exports.updateStudentProfile = async (req, res, next) => {
+  try {
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+    const fields = ['collegeName', 'rollNumber', 'department', 'semester', 'cgpa', 'bio', 'githubUrl', 'linkedinUrl', 'portfolioUrl'];
+    fields.forEach((f) => { if (req.body[f] !== undefined) student[f] = req.body[f]; });
+    await student.save();
+    res.status(200).json({ success: true, message: 'Profile updated', student });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload Resume
+// @route   POST /api/students/upload-resume
+// @access  Private (Student)
+exports.uploadResume = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+
+    // Build accessible URL (served from /uploads static route)
+    const resumeUrl = `/uploads/${req.file.filename}`;
+    student.resumeUrl = resumeUrl;
+    await student.save();
+
+    res.status(200).json({ success: true, message: 'Resume uploaded successfully', resumeUrl });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Opportunities for Students
+// @route   GET /api/students/opportunities
+// @access  Private (Student)
+exports.getStudentOpportunities = async (req, res, next) => {
+  try {
+    const { skill, type, location } = req.query;
+    let query = { status: 'open' };
+    if (type) query.type = type;
+    if (location) query.location = { $regex: location, $options: 'i' };
+    if (skill) query.requiredSkills = { $in: [new RegExp(skill, 'i')] };
+
+    let opportunities = await Opportunity.find(query).sort({ createdAt: -1 });
+
+    if (opportunities.length === 0) {
+      opportunities = [
+        { _id: 'opp-1', title: 'Frontend Developer Intern', companyName: 'TechCorp Solutions', type: 'Internship', location: 'Bangalore (Hybrid)', locationType: 'Hybrid', stipend: '₹35,000 / month', duration: '6 Months', deadline: '5d left', requiredSkills: ['React', 'TypeScript', 'Tailwind CSS', 'REST APIs'], description: 'Build high-performance responsive web applications.', openingsCount: 4, applicationsCount: 48, status: 'open' },
+        { _id: 'opp-2', title: 'Full Stack Engineer (MERN)', companyName: 'TechCorp Solutions', type: 'Job', location: 'Bangalore / Remote', locationType: 'Remote', stipend: '₹14 - 18 LPA', duration: 'Full Time', deadline: '12d left', requiredSkills: ['Node.js', 'Express', 'React', 'MongoDB', 'AWS'], description: 'Design and deploy scalable backend microservices.', openingsCount: 3, applicationsCount: 76, status: 'open' },
+        { _id: 'opp-3', title: 'Web Developer Intern', companyName: 'CodeSoft Global', type: 'Internship', location: 'Hyderabad / Hybrid', locationType: 'Hybrid', stipend: '₹28,000 / month', duration: '6 Months', deadline: '8d left', requiredSkills: ['JavaScript', 'Node.js', 'Express', 'MongoDB'], description: 'Develop REST endpoints, database schemas.', openingsCount: 5, applicationsCount: 54, status: 'open' },
+      ];
+    }
+
+    res.status(200).json({ success: true, opportunities });
+  } catch (error) {
+    next(error);
+  }
+};

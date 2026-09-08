@@ -412,3 +412,55 @@ exports.getCollegePlacements = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get College Internships
+// @route   GET /api/colleges/internships
+// @access  Private (College)
+exports.getCollegeInternships = async (req, res, next) => {
+  try {
+    let college = await College.findOne({ user: req.user.id });
+    let internships = [];
+    if (college) {
+      internships = await Internship.find({ college: college._id }).sort({ createdAt: -1 });
+    }
+    if (internships.length === 0) {
+      internships = [
+        { _id: 'int-c1', studentName: 'Harsh Gajre', companyName: 'TechCorp Solutions', role: 'Frontend Developer Intern', startDate: '2026-06-01', endDate: '2026-12-01', stipend: '₹35,000 / month', status: 'Active', mentor: 'Siddharth Rao', progressPercentage: 65 },
+        { _id: 'int-c2', studentName: 'Priya Singh', companyName: 'DesignStudio', role: 'UI/UX Design Intern', startDate: '2026-07-01', endDate: '2026-12-31', stipend: '₹28,000 / month', status: 'Active', mentor: 'Riya Patel', progressPercentage: 50 },
+        { _id: 'int-c3', studentName: 'Dev Mehta', companyName: 'CodeSoft Global', role: 'Backend Developer Intern', startDate: '2026-05-15', endDate: '2026-11-15', stipend: '₹30,000 / month', status: 'Active', mentor: 'Sanjay Deshmukh', progressPercentage: 78 },
+      ];
+    }
+    res.status(200).json({ success: true, internships });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get College Profile
+// @route   GET /api/colleges/profile
+// @access  Private (College)
+exports.getCollegeProfile = async (req, res, next) => {
+  try {
+    const college = await College.findOne({ user: req.user.id }).populate('user', 'name email avatar phone');
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    res.status(200).json({ success: true, college });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update College Profile
+// @route   PUT /api/colleges/profile
+// @access  Private (College)
+exports.updateCollegeProfile = async (req, res, next) => {
+  try {
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const fields = ['institutionName', 'code', 'university', 'state', 'city', 'accreditation', 'contactPerson', 'designation', 'website'];
+    fields.forEach((f) => { if (req.body[f] !== undefined) college[f] = req.body[f]; });
+    await college.save();
+    res.status(200).json({ success: true, message: 'College profile updated', college });
+  } catch (error) {
+    next(error);
+  }
+};

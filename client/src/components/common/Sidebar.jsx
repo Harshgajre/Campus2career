@@ -31,11 +31,11 @@ export const Sidebar = ({ role = 'student', isOpen, onClose, isCollapsed }) => {
   const roleConfig = {
     student: {
       title: 'STUDENT PANEL',
-      accentColor: '#3B82F6',
-      activeClass: 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-medium',
-      inactiveClass: 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/30',
-      tagColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-      iconColor: 'text-blue-500',
+      accentColor: '#7C3AED',
+      activeClass: 'bg-purple-600 text-white shadow-md shadow-purple-500/20 font-medium',
+      inactiveClass: 'text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/60 dark:hover:bg-purple-950/30',
+      tagColor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+      iconColor: 'text-purple-500',
       navItems: [
         { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
         { name: 'My Skills', path: '/student/skills', icon: Sparkles },
@@ -49,11 +49,11 @@ export const Sidebar = ({ role = 'student', isOpen, onClose, isCollapsed }) => {
     },
     college: {
       title: 'COLLEGE PANEL',
-      accentColor: '#8B5CF6',
-      activeClass: 'bg-purple-600 text-white shadow-md shadow-purple-500/20 font-medium',
-      inactiveClass: 'text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/60 dark:hover:bg-purple-950/30',
-      tagColor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-      iconColor: 'text-purple-500',
+      accentColor: '#2563EB',
+      activeClass: 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-medium',
+      inactiveClass: 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/30',
+      tagColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+      iconColor: 'text-blue-500',
       navItems: [
         { name: 'Dashboard', path: '/college/dashboard', icon: LayoutDashboard },
         { name: 'Students', path: '/college/students', icon: Users },

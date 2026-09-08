@@ -10,8 +10,8 @@ export const StatCard = ({
   className = '',
 }) => {
   const accentBorders = {
-    student: 'hover:border-blue-500/50 group-hover:text-blue-500',
-    college: 'hover:border-purple-500/50 group-hover:text-purple-500',
+    student: 'hover:border-purple-500/50 group-hover:text-purple-500',
+    college: 'hover:border-blue-500/50 group-hover:text-blue-500',
     company: 'hover:border-emerald-500/50 group-hover:text-emerald-500',
     admin: 'hover:border-orange-500/50 group-hover:text-orange-500',
   };

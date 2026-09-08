@@ -425,3 +425,135 @@ exports.getActiveInterns = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get Shortlisted Candidates
+// @route   GET /api/companies/shortlisted
+// @access  Private (Company)
+exports.getShortlistedCandidates = async (req, res, next) => {
+  try {
+    let company = await Company.findOne({ user: req.user.id });
+    let applications = [];
+    if (company) {
+      applications = await Application.find({ company: company._id, status: 'Shortlisted' });
+    }
+    if (applications.length === 0) {
+      applications = [
+        { _id: 'app-s1', studentName: 'Harsh Gajre', studentEmail: 'harsh@campus2career.com', studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', opportunityTitle: 'Frontend Developer Intern', matchScore: 94, skills: ['React', 'JavaScript', 'Tailwind CSS'], collegeName: 'MIT Institute of Technology', cgpa: 8.9, status: 'Shortlisted', appliedDate: '2026-08-28' },
+        { _id: 'app-s2', studentName: 'Priya Singh', studentEmail: 'priya@example.com', studentAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', opportunityTitle: 'UI/UX Product Designer', matchScore: 91, skills: ['Figma', 'Design Systems', 'React'], collegeName: 'Apex Institute of Technology', cgpa: 9.2, status: 'Shortlisted', appliedDate: '2026-08-25' },
+      ];
+    }
+    res.status(200).json({ success: true, shortlisted: applications });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Skill Requirements
+// @route   GET /api/companies/skill-requirements
+// @access  Private (Company)
+exports.getSkillRequirements = async (req, res, next) => {
+  try {
+    const skillRequirements = [
+      { skill: 'React.js', demandScore: 94, candidatesWithSkill: 1120, priority: 'Critical' },
+      { skill: 'Node.js & Express', demandScore: 91, candidatesWithSkill: 940, priority: 'Critical' },
+      { skill: 'TypeScript', demandScore: 89, candidatesWithSkill: 680, priority: 'High' },
+      { skill: 'Docker & Kubernetes', demandScore: 88, candidatesWithSkill: 520, priority: 'High' },
+      { skill: 'Python / FastAPI', demandScore: 86, candidatesWithSkill: 820, priority: 'Medium' },
+      { skill: 'SQL & Database Design', demandScore: 85, candidatesWithSkill: 760, priority: 'Medium' },
+    ];
+    res.status(200).json({ success: true, skillRequirements });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Opportunity
+// @route   PUT /api/companies/opportunities/:id
+// @access  Private (Company)
+exports.updateOpportunity = async (req, res, next) => {
+  try {
+    const opportunity = await Opportunity.findById(req.params.id);
+    if (!opportunity) return res.status(404).json({ success: false, message: 'Opportunity not found' });
+    const fields = ['title', 'type', 'location', 'locationType', 'stipend', 'duration', 'deadline', 'description', 'openingsCount', 'status', 'requiredSkills', 'preferredSkills'];
+    fields.forEach((f) => { if (req.body[f] !== undefined) opportunity[f] = req.body[f]; });
+    await opportunity.save();
+    res.status(200).json({ success: true, message: 'Opportunity updated', opportunity });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete Opportunity
+// @route   DELETE /api/companies/opportunities/:id
+// @access  Private (Company)
+exports.deleteOpportunity = async (req, res, next) => {
+  try {
+    await Opportunity.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: 'Opportunity deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Application Status (by company)
+// @route   PUT /api/companies/applications/:id/status
+// @access  Private (Company)
+exports.updateApplicationStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const application = await Application.findById(req.params.id);
+    if (!application) return res.status(404).json({ success: false, message: 'Application not found' });
+    application.status = status;
+    await application.save();
+    res.status(200).json({ success: true, message: 'Application status updated', application });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Company Profile
+// @route   GET /api/companies/profile
+// @access  Private (Company)
+exports.getCompanyProfile = async (req, res, next) => {
+  try {
+    const company = await Company.findOne({ user: req.user.id }).populate('user', 'name email avatar phone');
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
+    res.status(200).json({ success: true, company });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Company Profile
+// @route   PUT /api/companies/profile
+// @access  Private (Company)
+exports.updateCompanyProfile = async (req, res, next) => {
+  try {
+    const company = await Company.findOne({ user: req.user.id });
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
+    const fields = ['companyName', 'industryType', 'location', 'website', 'hrName', 'hrDesignation', 'description', 'founded', 'teamSize'];
+    fields.forEach((f) => { if (req.body[f] !== undefined) company[f] = req.body[f]; });
+    await company.save();
+    res.status(200).json({ success: true, message: 'Company profile updated', company });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Company Challenges
+// @route   GET /api/companies/challenges
+// @access  Private (Company)
+exports.getCompanyChallenges = async (req, res, next) => {
+  try {
+    let challenges = await Challenge.find().sort({ createdAt: -1 });
+    if (challenges.length === 0) {
+      challenges = [
+        { _id: 'ch-1', title: 'React & Tailwind Enterprise Dashboard', difficulty: 'Intermediate', category: 'Frontend Development', requiredSkills: ['React', 'Tailwind CSS', 'Recharts'], deadline: '1w left', prizePoints: '₹25,000 + Direct Interview Call', participantsCount: 142, status: 'active' },
+        { _id: 'ch-2', title: 'High-Concurrency Rate Limiter in Node.js', difficulty: 'Advanced', category: 'Backend Systems', requiredSkills: ['Node.js', 'Redis', 'Docker'], deadline: '4d left', prizePoints: '₹35,000 + Internship Offer', participantsCount: 88, status: 'active' },
+      ];
+    }
+    res.status(200).json({ success: true, challenges });
+  } catch (error) {
+    next(error);
+  }
+};

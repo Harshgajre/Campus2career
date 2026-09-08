@@ -334,3 +334,70 @@ exports.getAnalyticsReports = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get All Opportunities for Admin
+// @route   GET /api/admin/opportunities
+// @access  Private (Admin)
+exports.getAdminOpportunities = async (req, res, next) => {
+  try {
+    let opportunities = await Opportunity.find().sort({ createdAt: -1 });
+    if (opportunities.length === 0) {
+      opportunities = [
+        { _id: 'opp-1', title: 'Frontend Developer Intern', companyName: 'TechCorp Solutions', type: 'Internship', status: 'open', applicationsCount: 48, openingsCount: 4, deadline: '5d left' },
+        { _id: 'opp-2', title: 'Full Stack Engineer (MERN)', companyName: 'TechCorp Solutions', type: 'Job', status: 'open', applicationsCount: 76, openingsCount: 3, deadline: '12d left' },
+        { _id: 'opp-3', title: 'Web Developer Intern', companyName: 'CodeSoft Global', type: 'Internship', status: 'open', applicationsCount: 54, openingsCount: 5, deadline: '8d left' },
+      ];
+    }
+    res.status(200).json({ success: true, opportunities });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get All Challenges for Admin
+// @route   GET /api/admin/challenges
+// @access  Private (Admin)
+exports.getAdminChallenges = async (req, res, next) => {
+  try {
+    let challenges = await Challenge.find().sort({ createdAt: -1 });
+    if (challenges.length === 0) {
+      challenges = [
+        { _id: 'ch-1', title: 'React & Tailwind Enterprise Dashboard', companyName: 'TechCorp', difficulty: 'Intermediate', status: 'active', participantsCount: 142, deadline: '1w left' },
+        { _id: 'ch-2', title: 'UI/UX Design Challenge: FinTech App', companyName: 'DesignStudio', difficulty: 'Intermediate', status: 'active', participantsCount: 95, deadline: '1w left' },
+        { _id: 'ch-3', title: 'High-Concurrency Rate Limiter', companyName: 'CodeSoft', difficulty: 'Advanced', status: 'active', participantsCount: 88, deadline: '4d left' },
+      ];
+    }
+    res.status(200).json({ success: true, challenges });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete/Deactivate a User
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Admin)
+exports.deleteAdminUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: 'User removed from platform' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Toggle User Active/Suspended Status
+// @route   PUT /api/admin/users/:id/status
+// @access  Private (Admin)
+exports.toggleUserStatus = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.status = user.status === 'active' ? 'suspended' : 'active';
+    await user.save();
+    res.status(200).json({ success: true, message: `User ${user.status}`, user: { id: user._id, name: user.name, status: user.status } });
+  } catch (error) {
+    next(error);
+  }
+};

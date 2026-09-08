@@ -2,8 +2,8 @@ import React from 'react';
 import { ArrowLeft, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
-import c2cLogoLight from '../../assets/c2c-logo-light.jpg';
-import c2cLogoDark from '../../assets/c2c-logo-dark.jpg';
+import c2cLogoLight from '../../assets/c2c-logo-light.png';
+import c2cLogoDark from '../../assets/c2c-logo-dark.png';
 
 const inputClass = 'w-full rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/45 dark:text-slate-100 dark:placeholder-slate-500';
 

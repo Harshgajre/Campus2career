@@ -13,18 +13,18 @@ export const CircularProgress = ({
 
   const roleColors = {
     student: {
-      stroke: '#3B82F6',
-      track: '#DBEAFE',
+      stroke: '#7C3AED',
+      track: '#F3E8FF',
       darkTrack: '#1E293B',
-      glow: 'filter drop-shadow(0 0 8px rgba(59, 130, 246, 0.6))',
-      textColor: 'text-blue-500',
+      glow: 'filter drop-shadow(0 0 8px rgba(124, 58, 237, 0.6))',
+      textColor: 'text-purple-500',
     },
     college: {
-      stroke: '#8B5CF6',
-      track: '#EDE9FE',
+      stroke: '#2563EB',
+      track: '#DBEAFE',
       darkTrack: '#1E293B',
-      glow: 'filter drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))',
-      textColor: 'text-purple-500',
+      glow: 'filter drop-shadow(0 0 8px rgba(37, 99, 235, 0.6))',
+      textColor: 'text-blue-500',
     },
     company: {
       stroke: '#10B981',

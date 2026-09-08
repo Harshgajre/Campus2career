@@ -119,7 +119,7 @@ export const StudentDashboard = () => {
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span className="text-slate-500 dark:text-slate-400 font-medium">Employability Index</span>
-            <span className="font-bold text-blue-600 dark:text-blue-400">
+            <span className="font-bold text-purple-600 dark:text-purple-400">
               {data.skillsProgress.employabilityScore}% Match
             </span>
           </div>
@@ -133,7 +133,7 @@ export const StudentDashboard = () => {
             </h3>
             <Link
               to="/student/applications"
-              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
             >
               View All
             </Link>
@@ -146,10 +146,10 @@ export const StudentDashboard = () => {
                 className={`flex items-center justify-between pt-3.5 first:pt-0 group`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full border border-blue-500/40 bg-blue-50/50 dark:bg-blue-950/40 flex items-center justify-center text-blue-500 flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full border border-purple-500/40 bg-purple-50/50 dark:bg-purple-950/40 flex items-center justify-center text-purple-500 flex-shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-500 transition-colors">
+                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-purple-500 transition-colors">
                     {activity.title}
                   </span>
                 </div>
@@ -163,7 +163,7 @@ export const StudentDashboard = () => {
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-right">
             <Link
               to="/student/roadmap"
-              className="text-xs text-blue-600 dark:text-blue-400 font-semibold inline-flex items-center gap-1 hover:gap-1.5 transition-all"
+              className="text-xs text-purple-600 dark:text-purple-400 font-semibold inline-flex items-center gap-1 hover:gap-1.5 transition-all"
             >
               View My Career Roadmap <ChevronRight className="w-3.5 h-3.5" />
             </Link>
@@ -179,7 +179,7 @@ export const StudentDashboard = () => {
           </h3>
           <Link
             to="/student/opportunities"
-            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
           >
             View All
           </Link>
@@ -189,14 +189,14 @@ export const StudentDashboard = () => {
           {data.upcomingOpportunities.map((opp) => (
             <div
               key={opp.id}
-              className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 hover:border-blue-500/50 transition-all group"
+              className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 hover:border-purple-500/50 transition-all group"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
                   <Briefcase className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-500 transition-colors">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-purple-500 transition-colors">
                     {opp.title}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -206,12 +206,12 @@ export const StudentDashboard = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2.5 py-1 rounded-full border border-purple-200/60 dark:border-purple-800/60">
                   {opp.deadline}
                 </span>
                 <Link
                   to="/student/opportunities"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </Link>

@@ -29,3 +29,5 @@ logs/
 .idea/
 .DS_Store
 Thumbs.db
+.gemini/
+server/uploads/

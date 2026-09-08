@@ -118,7 +118,7 @@ export const CollegeDashboard = () => {
             </div>
             <Link
               to="/college/analytics"
-              className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
             >
               Detailed Reports
             </Link>
@@ -129,9 +129,9 @@ export const CollegeDashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.skillAnalytics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
+                  <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
@@ -149,12 +149,12 @@ export const CollegeDashboard = () => {
                 <Area
                   type="monotone"
                   dataKey="count"
-                  stroke="#8B5CF6"
+                  stroke="#2563EB"
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#purpleGradient)"
-                  dot={{ r: 4, fill: '#8B5CF6' }}
-                  activeDot={{ r: 6, fill: '#A78BFA' }}
+                  fill="url(#blueGradient)"
+                  dot={{ r: 4, fill: '#2563EB' }}
+                  activeDot={{ r: 6, fill: '#60A5FA' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -170,7 +170,7 @@ export const CollegeDashboard = () => {
               </h3>
               <Link
                 to="/college/training-programs"
-                className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
               >
                 View All
               </Link>
@@ -179,7 +179,7 @@ export const CollegeDashboard = () => {
             <div className="space-y-3.5 divide-y divide-slate-100 dark:divide-slate-800/60">
               {data.recentUpdates.map((update, idx) => (
                 <div key={update.id || idx} className="pt-3.5 first:pt-0 flex items-start gap-3 group">
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5">
                     {update.category === 'training' ? (
                       <BookOpen className="w-4 h-4" />
                     ) : update.category === 'internship' ? (
@@ -189,7 +189,7 @@ export const CollegeDashboard = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-purple-500 transition-colors">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-500 transition-colors">
                       {update.title}
                     </p>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500">
@@ -204,7 +204,7 @@ export const CollegeDashboard = () => {
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
             <Link
               to="/college/skill-gap"
-              className="text-xs font-semibold text-purple-600 dark:text-purple-400 inline-flex items-center gap-1 hover:gap-1.5 transition-all"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 inline-flex items-center gap-1 hover:gap-1.5 transition-all"
             >
               Analyze Industry Skill Gap <ChevronRight className="w-3.5 h-3.5" />
             </Link>

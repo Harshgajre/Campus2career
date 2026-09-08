@@ -131,13 +131,20 @@
 
   /* ── Animated glow keyframe for login card border (dark theme) ── */
   @keyframes auth-card-glow {
-    0%, 100% { box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.45), 0 0 0.8rem color-mix(in srgb, var(--auth-role) 30%, transparent), 0 0 2rem color-mix(in srgb, var(--auth-role) 14%, transparent); }
-    50%       { box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.45), 0 0 1.6rem color-mix(in srgb, var(--auth-role) 55%, transparent), 0 0 3.6rem color-mix(in srgb, var(--auth-role) 22%, transparent); }
+
+    0%,
+    100% {
+      box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45), 0 0 0.8rem color-mix(in srgb, var(--auth-role) 30%, transparent), 0 0 2rem color-mix(in srgb, var(--auth-role) 14%, transparent);
+    }
+
+    50% {
+      box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45), 0 0 1.6rem color-mix(in srgb, var(--auth-role) 55%, transparent), 0 0 3.6rem color-mix(in srgb, var(--auth-role) 22%, transparent);
+    }
   }
 
   .auth-card {
     /* Light theme: clean white card with a faint role-color border */
-    border-color: color-mix(in srgb, var(--auth-role) 22%, rgba(226,232,240,0.92));
+    border-color: color-mix(in srgb, var(--auth-role) 22%, rgba(226, 232, 240, 0.92));
     background: rgba(255, 255, 255, 0.82);
     box-shadow: 0 1.5rem 3rem rgba(79, 70, 229, 0.10), 0 0.2rem 0.8rem rgba(15, 23, 42, 0.05);
     backdrop-filter: blur(0.9rem);
