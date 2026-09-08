@@ -64,6 +64,10 @@ export const IndustryLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">
+        New here?{' '}
+        <a href="/register/company" className="font-bold text-emerald-600 hover:underline dark:text-emerald-400">Register Company</a>
+      </div>
       <ChangeAccountType role="industry" />
     </RoleAuthLayout>
   );

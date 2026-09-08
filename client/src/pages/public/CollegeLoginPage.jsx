@@ -64,6 +64,10 @@ export const CollegeLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">
+        New here?{' '}
+        <a href="/register/college" className="font-bold text-blue-600 hover:underline dark:text-blue-400">Register Institution</a>
+      </div>
       <ChangeAccountType role="college" />
     </RoleAuthLayout>
   );

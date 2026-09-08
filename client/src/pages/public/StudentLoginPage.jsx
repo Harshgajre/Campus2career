@@ -64,6 +64,10 @@ export const StudentLoginPage = () => {
           {loading ? 'Signing in...' : 'Login'}
         </button>
       </form>
+      <div className="mt-4 text-center text-[10px] text-slate-500 dark:text-slate-400">
+        New here?{' '}
+        <a href="/register/student" className="font-bold text-purple-600 hover:underline dark:text-purple-400">Register as Student</a>
+      </div>
       <ChangeAccountType role="student" />
     </RoleAuthLayout>
   );

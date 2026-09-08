@@ -129,17 +129,25 @@
     box-shadow: 0 0 1.5rem color-mix(in srgb, var(--auth-role) 34%, transparent), inset 0 0 1rem color-mix(in srgb, var(--auth-role) 18%, transparent);
   }
 
+  /* ── Animated glow keyframe for login card border (dark theme) ── */
+  @keyframes auth-card-glow {
+    0%, 100% { box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.45), 0 0 0.8rem color-mix(in srgb, var(--auth-role) 30%, transparent), 0 0 2rem color-mix(in srgb, var(--auth-role) 14%, transparent); }
+    50%       { box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.45), 0 0 1.6rem color-mix(in srgb, var(--auth-role) 55%, transparent), 0 0 3.6rem color-mix(in srgb, var(--auth-role) 22%, transparent); }
+  }
+
   .auth-card {
-    border-color: rgba(226, 232, 240, 0.92);
+    /* Light theme: clean white card with a faint role-color border */
+    border-color: color-mix(in srgb, var(--auth-role) 22%, rgba(226,232,240,0.92));
     background: rgba(255, 255, 255, 0.82);
-    box-shadow: 0 1.5rem 3rem rgba(79, 70, 229, 0.13), 0 0.2rem 0.8rem rgba(15, 23, 42, 0.05);
+    box-shadow: 0 1.5rem 3rem rgba(79, 70, 229, 0.10), 0 0.2rem 0.8rem rgba(15, 23, 42, 0.05);
     backdrop-filter: blur(0.9rem);
   }
 
   .dark .auth-card {
-    border-color: color-mix(in srgb, var(--auth-role) 62%, #1e293b);
+    /* Dark theme: vivid role-color border + slow pulsing glow, no change to layout */
+    border-color: color-mix(in srgb, var(--auth-role) 72%, #1e293b);
     background: rgba(4, 8, 39, 0.72);
-    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45), 0 0 1.2rem color-mix(in srgb, var(--auth-role) 18%, transparent);
+    animation: auth-card-glow 3s ease-in-out infinite;
   }
 
   .auth-icon {
@@ -155,32 +163,62 @@
 
 /* ── Animate-in utility (polyfill for tailwindcss-animate) ── */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
+
 @keyframes slideInFromTop {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes slideInFromBottom {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-in {
   animation-fill-mode: both;
 }
+
 .fade-in {
   animation-name: fadeIn;
 }
+
 .slide-in-from-top-2 {
   animation-name: slideInFromTop;
 }
+
 .slide-in-from-bottom-2 {
   animation-name: slideInFromBottom;
 }
-.duration-150 { animation-duration: 150ms; }
-.duration-200 { animation-duration: 200ms; }
+
+.duration-150 {
+  animation-duration: 150ms;
+}
+
+.duration-200 {
+  animation-duration: 200ms;
+}
 
 /* ── Toast Notifications ── */
 .toast-container {
@@ -278,13 +316,18 @@
     background: white !important;
     color: black !important;
   }
+
   .no-print {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
   }
-  .shadow-card-light, .shadow-card-dark, .shadow-2xl {
+
+  .shadow-card-light,
+  .shadow-card-dark,
+  .shadow-2xl {
     box-shadow: none !important;
   }
 }
