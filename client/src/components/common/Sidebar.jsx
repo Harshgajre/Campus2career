@@ -1,5 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import c2cLogoLight from '../../assets/c2c-logo-light.png';
+import c2cLogoDark from '../../assets/c2c-logo-dark.png';
 import {
   LayoutDashboard,
   Sparkles,
@@ -127,9 +129,16 @@ export const Sidebar = ({ role = 'student', isOpen, onClose, isCollapsed }) => {
         <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="flex items-center gap-3 overflow-hidden">
             {/* Logo Icon */}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex-shrink-0">
-              C2C
-            </div>
+            <img
+              src={c2cLogoDark}
+              alt="Campus2Career Logo"
+              className="block dark:hidden h-8 w-auto flex-shrink-0 object-contain"
+            />
+            <img
+              src={c2cLogoLight}
+              alt="Campus2Career Logo"
+              className="hidden dark:block h-8 w-auto flex-shrink-0 object-contain"
+            />
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
