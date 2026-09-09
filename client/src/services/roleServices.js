@@ -25,6 +25,16 @@ export const studentService = {
     const res = await API.get('/students/projects');
     return res.data;
   },
+  getOpportunities: async () => {
+    const res = await API.get('/students/opportunities');
+    return res.data;
+  },
+  uploadResume: async (file) => {
+    const formData = new FormData();
+    formData.append('resume', file);
+    const res = await API.post('/students/upload-resume', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return res.data;
+  },
   createProject: async (projectData) => {
     const res = await API.post('/students/projects', projectData);
     return res.data;

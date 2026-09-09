@@ -10,7 +10,8 @@ node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
-server/.env
+.env.example
+.server/.env
 
 # Production Build outputs
 dist/

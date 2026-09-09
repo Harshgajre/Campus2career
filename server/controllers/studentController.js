@@ -11,16 +11,14 @@ const Notification = require('../models/Notification');
 // @access  Private (Student)
 exports.getStudentDashboard = async (req, res, next) => {
   try {
-    let student = await Student.findOne({ user: req.user.id });
-    if (!student) {
-      student = await Student.findOne(); // fallback demo
-    }
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
 
-    const skillsCount = student ? student.skills.length : 12;
-    const projectsCount = await Project.countDocuments({ student: student ? student._id : null }) || 5;
-    const challengesCount = student ? student.challengesCompletedCount : 8;
+    const skillsCount = student.skills.length;
+    const projectsCount = await Project.countDocuments({ student: student._id });
+    const challengesCount = student.challengesCompletedCount || 0;
     const activeApplicationsCount = await Application.countDocuments({
-      student: student ? student._id : null,
+      student: student._id,
       status: { $in: ['Applied', 'Under Review', 'Shortlisted', 'Interview Scheduled'] },
     }) || 3;
 
@@ -86,7 +84,7 @@ exports.getStudentDashboard = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        welcomeMessage: 'Welcome back, Harsh! 👋',
+        welcomeMessage: `Welcome Back, ${req.user.name}!`,
         subtitle: 'Track your skills, grow and achieve your goals.',
         stats: {
           skills: { count: skillsCount, label: 'Competencies' },
@@ -95,8 +93,8 @@ exports.getStudentDashboard = async (req, res, next) => {
           applications: { count: activeApplicationsCount, label: 'Active' },
         },
         skillsProgress: {
-          overallProgress: student ? student.overallProgress : 75,
-          employabilityScore: student ? student.employabilityScore : 88,
+          overallProgress: student.overallProgress,
+          employabilityScore: student.employabilityScore,
         },
         recentActivity,
         upcomingOpportunities,
@@ -112,26 +110,8 @@ exports.getStudentDashboard = async (req, res, next) => {
 // @access  Private (Student)
 exports.getStudentSkills = async (req, res, next) => {
   try {
-    let student = await Student.findOne({ user: req.user.id });
-    if (!student) {
-      return res.status(200).json({
-        success: true,
-        skills: [
-          { _id: '1', name: 'React.js', category: 'Frontend', level: 'Advanced', verified: true, score: 92 },
-          { _id: '2', name: 'JavaScript (ES6+)', category: 'Frontend', level: 'Expert', verified: true, score: 95 },
-          { _id: '3', name: 'Tailwind CSS', category: 'Frontend', level: 'Advanced', verified: true, score: 90 },
-          { _id: '4', name: 'Node.js', category: 'Backend', level: 'Intermediate', verified: true, score: 84 },
-          { _id: '5', name: 'Express.js', category: 'Backend', level: 'Intermediate', verified: true, score: 82 },
-          { _id: '6', name: 'MongoDB', category: 'Backend', level: 'Intermediate', verified: true, score: 80 },
-          { _id: '7', name: 'TypeScript', category: 'Frontend', level: 'Intermediate', verified: false, score: 75 },
-          { _id: '8', name: 'Data Structures & Algorithms', category: 'Core CS', level: 'Advanced', verified: true, score: 88 },
-          { _id: '9', name: 'Git & GitHub', category: 'DevOps & Cloud', level: 'Advanced', verified: true, score: 90 },
-          { _id: '10', name: 'REST APIs', category: 'Backend', level: 'Expert', verified: true, score: 94 },
-          { _id: '11', name: 'UI/UX Design & Figma', category: 'UI/UX', level: 'Intermediate', verified: false, score: 78 },
-          { _id: '12', name: 'Docker & Containers', category: 'DevOps & Cloud', level: 'Beginner', verified: false, score: 65 },
-        ],
-      });
-    }
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
 
     res.status(200).json({ success: true, skills: student.skills });
   } catch (error) {
@@ -227,73 +207,35 @@ exports.deleteStudentSkill = async (req, res, next) => {
 // @access  Private (Student)
 exports.getStudentProjects = async (req, res, next) => {
   try {
-    let student = await Student.findOne({ user: req.user.id });
-    let projects = [];
-    if (student) {
-      projects = await Project.find({ student: student._id });
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+    const savedProjects = await Project.find({ student: student._id }).sort({ createdAt: -1 });
+    let githubProjects = [];
+    const githubMatch = student.githubUrl?.match(/^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9-]+)\/?$/i);
+
+    if (githubMatch) {
+      try {
+        const response = await fetch(`https://api.github.com/users/${githubMatch[1]}/repos?sort=updated&per_page=100`, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Campus2Career' } });
+        if (response.ok) {
+          const repos = await response.json();
+          const savedLinks = new Set(savedProjects.map((project) => project.githubLink));
+          githubProjects = repos.filter((repo) => !repo.fork && !repo.private && !savedLinks.has(repo.html_url)).map((repo) => ({
+            _id: `github-${repo.id}`,
+            title: repo.name,
+            description: repo.description || 'Public GitHub repository',
+            technologies: repo.language ? [repo.language] : [],
+            githubLink: repo.html_url,
+            liveLink: repo.homepage || '',
+            status: 'completed',
+            source: 'github',
+          }));
+        }
+      } catch (_) {
+        // GitHub is optional; MongoDB projects still load when the API is unavailable.
+      }
     }
 
-    if (projects.length === 0) {
-      projects = [
-        {
-          _id: 'proj-1',
-          title: 'Campus2Career Platform',
-          description: 'A unified career and skill passport ecosystem for students, colleges, and enterprises.',
-          technologies: ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'Recharts'],
-          githubLink: 'https://github.com/harshgajre/campus2career',
-          liveLink: 'https://campus2career.io',
-          status: 'completed',
-          featured: true,
-          likes: 42,
-        },
-        {
-          _id: 'proj-2',
-          title: 'AI Resume & Skill Gap Matcher',
-          description: 'Machine learning assisted skill scoring and real-time gap analysis against enterprise job descriptions.',
-          technologies: ['Python', 'FastAPI', 'React', 'OpenAI API', 'ChromaDB'],
-          githubLink: 'https://github.com/harshgajre/ai-resume-matcher',
-          liveLink: 'https://ai-matcher.demo.io',
-          status: 'completed',
-          featured: true,
-          likes: 38,
-        },
-        {
-          _id: 'proj-3',
-          title: 'Real-time Collaborative Code IDE',
-          description: 'WebRTC & Socket.io enabled browser code editor with live syntax highlighting and execution sandbox.',
-          technologies: ['React', 'Socket.io', 'Monaco Editor', 'Docker', 'Redis'],
-          githubLink: 'https://github.com/harshgajre/collab-code-ide',
-          liveLink: 'https://ide.livecode.io',
-          status: 'completed',
-          featured: false,
-          likes: 29,
-        },
-        {
-          _id: 'proj-4',
-          title: 'Crypto & Stock Portfolio Tracker',
-          description: 'Real-time financial asset tracker with candlestick visualizations and alert triggers.',
-          technologies: ['Next.js', 'TypeScript', 'Tailwind', 'TradingView API'],
-          githubLink: 'https://github.com/harshgajre/portfolio-tracker',
-          liveLink: 'https://crypto-track.vercel.app',
-          status: 'completed',
-          featured: false,
-          likes: 19,
-        },
-        {
-          _id: 'proj-5',
-          title: 'Decentralized Credential Verifier',
-          description: 'Polygon blockchain smart contract solution for tamper-proof university degree verification.',
-          technologies: ['Solidity', 'Hardhat', 'Ethers.js', 'React'],
-          githubLink: 'https://github.com/harshgajre/degree-verifier',
-          liveLink: '',
-          status: 'in-progress',
-          featured: false,
-          likes: 14,
-        },
-      ];
-    }
-
-    res.status(200).json({ success: true, projects });
+    res.status(200).json({ success: true, projects: [...savedProjects, ...githubProjects] });
   } catch (error) {
     next(error);
   }
@@ -337,7 +279,8 @@ exports.createStudentProject = async (req, res, next) => {
 exports.updateStudentProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const project = await Project.findById(id);
+    const student = await Student.findOne({ user: req.user.id });
+    const project = student ? await Project.findOne({ _id: id, student: student._id }) : null;
 
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
@@ -368,7 +311,9 @@ exports.updateStudentProject = async (req, res, next) => {
 exports.deleteStudentProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    await Project.findByIdAndDelete(id);
+    const student = await Student.findOne({ user: req.user.id });
+    const project = student ? await Project.findOneAndDelete({ _id: id, student: student._id }) : null;
+    if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
     res.status(200).json({ success: true, message: 'Project deleted successfully' });
   } catch (error) {
     next(error);
@@ -504,53 +449,9 @@ exports.getStudentRoadmap = async (req, res, next) => {
 // @access  Private (Student)
 exports.getStudentApplications = async (req, res, next) => {
   try {
-    let student = await Student.findOne({ user: req.user.id });
-    let applications = [];
-
-    if (student) {
-      applications = await Application.find({ student: student._id }).populate('opportunity company');
-    }
-
-    if (applications.length === 0) {
-      applications = [
-        {
-          _id: 'app-1',
-          opportunityTitle: 'Frontend Developer Intern',
-          companyName: 'TechCorp Solutions',
-          companyLogo: 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&q=80&w=120',
-          type: 'Internship',
-          stipend: '₹35,000 / month',
-          status: 'Interview Scheduled',
-          appliedDate: '2026-08-28',
-          matchScore: 92,
-          notes: 'Technical Round 1 scheduled for Sep 10, 11:00 AM',
-        },
-        {
-          _id: 'app-2',
-          opportunityTitle: 'UI/UX & Product Design Challenge',
-          companyName: 'DesignStudio',
-          companyLogo: 'https://images.unsplash.com/photo-1572021335469-31706a17aaef?auto=format&fit=crop&q=80&w=120',
-          type: 'Challenge',
-          stipend: '₹25,000 Prize',
-          status: 'Under Review',
-          appliedDate: '2026-08-25',
-          matchScore: 88,
-          notes: 'Figma prototype submission submitted successfully',
-        },
-        {
-          _id: 'app-3',
-          opportunityTitle: 'Web Developer Intern',
-          companyName: 'CodeSoft Innovations',
-          companyLogo: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=120',
-          type: 'Internship',
-          stipend: '₹28,000 / month',
-          status: 'Applied',
-          appliedDate: '2026-08-30',
-          matchScore: 84,
-          notes: 'Application submitted, awaiting initial recruiter screening',
-        },
-      ];
-    }
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+    const applications = await Application.find({ student: student._id }).populate('opportunity company');
 
     res.status(200).json({ success: true, applications });
   } catch (error) {
@@ -632,6 +533,9 @@ exports.updateStudentProfile = async (req, res, next) => {
   try {
     const student = await Student.findOne({ user: req.user.id });
     if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
+    if (req.body.githubUrl && !/^https:\/\/(www\.)?github\.com\/[A-Za-z0-9-]+\/?$/i.test(req.body.githubUrl.trim())) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid GitHub profile URL' });
+    }
     const fields = ['collegeName', 'rollNumber', 'department', 'semester', 'cgpa', 'bio', 'githubUrl', 'linkedinUrl', 'portfolioUrl'];
     fields.forEach((f) => { if (req.body[f] !== undefined) student[f] = req.body[f]; });
     await student.save();
@@ -654,10 +558,17 @@ exports.uploadResume = async (req, res, next) => {
 
     // Build accessible URL (served from /uploads static route)
     const resumeUrl = `/uploads/${req.file.filename}`;
+    const { extractTextFromFile, parseResumeData } = require('../utils/resumeParser');
+    const extractedResumeData = parseResumeData(await extractTextFromFile(req.file.path, req.file.mimetype, req.file.originalname));
     student.resumeUrl = resumeUrl;
+    student.resumeFileName = req.file.originalname;
+    student.extractedResumeData = extractedResumeData;
+    if (!student.skills.length && extractedResumeData.skills.length) {
+      student.skills = extractedResumeData.skills.map((name) => ({ name, category: 'Other', level: 'Intermediate', verified: false, score: 0 }));
+    }
     await student.save();
 
-    res.status(200).json({ success: true, message: 'Resume uploaded successfully', resumeUrl });
+    res.status(200).json({ success: true, message: 'Resume uploaded and extracted successfully', resumeUrl, resumeFileName: req.file.originalname, extractedResumeData });
   } catch (error) {
     next(error);
   }
@@ -672,17 +583,12 @@ exports.getStudentOpportunities = async (req, res, next) => {
     let query = { status: 'open' };
     if (type) query.type = type;
     if (location) query.location = { $regex: location, $options: 'i' };
-    if (skill) query.requiredSkills = { $in: [new RegExp(skill, 'i')] };
-
-    let opportunities = await Opportunity.find(query).sort({ createdAt: -1 });
-
-    if (opportunities.length === 0) {
-      opportunities = [
-        { _id: 'opp-1', title: 'Frontend Developer Intern', companyName: 'TechCorp Solutions', type: 'Internship', location: 'Bangalore (Hybrid)', locationType: 'Hybrid', stipend: '₹35,000 / month', duration: '6 Months', deadline: '5d left', requiredSkills: ['React', 'TypeScript', 'Tailwind CSS', 'REST APIs'], description: 'Build high-performance responsive web applications.', openingsCount: 4, applicationsCount: 48, status: 'open' },
-        { _id: 'opp-2', title: 'Full Stack Engineer (MERN)', companyName: 'TechCorp Solutions', type: 'Job', location: 'Bangalore / Remote', locationType: 'Remote', stipend: '₹14 - 18 LPA', duration: 'Full Time', deadline: '12d left', requiredSkills: ['Node.js', 'Express', 'React', 'MongoDB', 'AWS'], description: 'Design and deploy scalable backend microservices.', openingsCount: 3, applicationsCount: 76, status: 'open' },
-        { _id: 'opp-3', title: 'Web Developer Intern', companyName: 'CodeSoft Global', type: 'Internship', location: 'Hyderabad / Hybrid', locationType: 'Hybrid', stipend: '₹28,000 / month', duration: '6 Months', deadline: '8d left', requiredSkills: ['JavaScript', 'Node.js', 'Express', 'MongoDB'], description: 'Develop REST endpoints, database schemas.', openingsCount: 5, applicationsCount: 54, status: 'open' },
-      ];
+    if (skill) {
+      const escapedSkill = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.requiredSkills = { $in: [new RegExp(escapedSkill, 'i')] };
     }
+
+    const opportunities = await Opportunity.find(query).populate('company', 'companyName').sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, opportunities });
   } catch (error) {

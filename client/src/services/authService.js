@@ -29,4 +29,12 @@ export const authService = {
     const response = await API.put('/auth/profile', data);
     return response.data;
   },
+  parseResume: async (file) => {
+    const formData = new FormData();
+    formData.append('resume', file);
+    const response = await API.post('/auth/parse-resume', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
 };

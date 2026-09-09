@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Award, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { authService } from '../../services/authService';
 import {
   AuthError,
   AuthField,
@@ -15,7 +16,8 @@ export const RegisterStudentPage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', rollNumber: '', department: 'Computer Science', semester: 6, collegeName: '', bio: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', rollNumber: '', department: 'Computer Science', semester: 6, collegeName: '', bio: '', githubUrl: '' });
+  const [resume, setResume] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const update = (field) => (event) => setFormData({ ...formData, [field]: event.target.value });
@@ -24,7 +26,23 @@ export const RegisterStudentPage = () => {
     event.preventDefault();
     setError('');
     setLoading(true);
-    const res = await register('student', formData);
+    let registrationData = { ...formData };
+    try {
+      if (resume) {
+        const parsedResume = await authService.parseResume(resume);
+        registrationData = {
+          ...registrationData,
+          resumeUrl: parsedResume.resumeUrl,
+          resumeFileName: parsedResume.resumeFileName,
+          extractedResumeData: parsedResume.data,
+        };
+      }
+    } catch (uploadError) {
+      setLoading(false);
+      setError(uploadError.response?.data?.message || 'Resume could not be processed. Please upload a PDF or DOCX file.');
+      return;
+    }
+    const res = await register('student', registrationData);
     setLoading(false);
     if (res.success) navigate('/student/dashboard');
     else setError(res.message || 'Registration failed');
@@ -50,8 +68,10 @@ export const RegisterStudentPage = () => {
           <AuthField label="Password"><PasswordInput value={formData.password} onChange={update('password')} placeholder="Create a password" showPassword={showPassword} onToggle={() => setShowPassword(!showPassword)} required /></AuthField>
           <AuthField label="Roll Number"><AuthInput value={formData.rollNumber} onChange={update('rollNumber')} placeholder="STU-2024-001" required /></AuthField>
           <AuthField label="College / University"><AuthInput value={formData.collegeName} onChange={update('collegeName')} placeholder="Institution name" required /></AuthField>
+          <AuthField label="GitHub URL"><AuthInput type="url" value={formData.githubUrl} onChange={update('githubUrl')} placeholder="https://github.com/username" required /></AuthField>
           <AuthField label="Department"><AuthSelect value={formData.department} onChange={update('department')}><option>Computer Science</option><option>Information Technology</option><option>AI & Data Science</option><option>Electronics</option><option>Mechanical</option></AuthSelect></AuthField>
         </div>
+        <AuthField label="Resume (PDF or DOCX)"><input type="file" accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => setResume(event.target.files?.[0] || null)} required className="w-full rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-950/45 dark:text-slate-200" /></AuthField>
         <AuthField label="Short Bio"><textarea rows="2" value={formData.bio} onChange={update('bio')} placeholder="Tell us about your interests" className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 dark:border-slate-700 dark:bg-slate-950/45 dark:text-slate-100 dark:placeholder-slate-500" /></AuthField>
         <button type="submit" disabled={loading} className="w-full rounded-lg bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 transition hover:bg-purple-700 disabled:opacity-50">{loading ? 'Creating account...' : 'Create Student Account'}</button>
       </form>

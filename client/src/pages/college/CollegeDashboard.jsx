@@ -27,7 +27,7 @@ import {
 
 export const CollegeDashboard = () => {
   const [data, setData] = useState({
-    welcomeMessage: 'Welcome, Dr. Mehta! 🎓',
+    welcomeMessage: 'Welcome Back!',
     subtitle: 'Monitor students and improve outcomes.',
     stats: {
       totalStudents: { count: '1,245', numeric: 1245, label: 'Total Students' },

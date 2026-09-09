@@ -3,13 +3,42 @@ const Student = require('../models/Student');
 const College = require('../models/College');
 const Company = require('../models/Company');
 const generateToken = require('../utils/generateToken');
+const { extractTextFromFile, parseResumeData } = require('../utils/resumeParser');
+
+// @desc    Parse Resume PDF/DOCX
+// @route   POST /api/auth/parse-resume
+// @access  Public
+exports.parseResume = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a resume file' });
+    }
+
+    const rawText = await extractTextFromFile(req.file.path, req.file.mimetype, req.file.originalname);
+    const parsedData = parseResumeData(rawText);
+    const resumeUrl = `/uploads/${req.file.filename}`;
+
+    res.status(200).json({
+      success: true,
+      resumeUrl,
+      resumeFileName: req.file.originalname,
+      data: parsedData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Register Student
 // @route   POST /api/auth/register-student
 // @access  Public
 exports.registerStudent = async (req, res, next) => {
   try {
-    const { name, email, password, rollNumber, department, semester, collegeName, bio, skills } = req.body;
+    const { name, email, password, rollNumber, department, semester, collegeName, bio, skills, githubUrl, resumeUrl, resumeFileName, extractedResumeData } = req.body;
+
+    if (githubUrl && !/^https:\/\/(www\.)?github\.com\/[A-Za-z0-9-]+\/?$/i.test(githubUrl.trim())) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid GitHub profile URL' });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -24,23 +53,48 @@ exports.registerStudent = async (req, res, next) => {
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
     });
 
-    const parsedSkills = Array.isArray(skills) ? skills : [
-      { name: 'JavaScript', category: 'Frontend', level: 'Advanced', verified: true, score: 90 },
-      { name: 'React', category: 'Frontend', level: 'Advanced', verified: true, score: 88 },
-      { name: 'Node.js', category: 'Backend', level: 'Intermediate', verified: true, score: 82 },
-      { name: 'MongoDB', category: 'Backend', level: 'Intermediate', verified: true, score: 80 },
-    ];
+    let formattedSkills = [];
+    if (Array.isArray(skills) && skills.length > 0 && typeof skills[0] === 'object') {
+      formattedSkills = skills;
+    } else if (Array.isArray(skills) && skills.length > 0) {
+      formattedSkills = skills.map(s => ({
+        name: s,
+        category: 'Frontend',
+        level: 'Intermediate',
+        verified: true,
+        score: 85
+      }));
+    } else if (extractedResumeData?.skills && extractedResumeData.skills.length > 0) {
+      formattedSkills = extractedResumeData.skills.map(s => ({
+        name: s,
+        category: 'Frontend',
+        level: 'Intermediate',
+        verified: true,
+        score: 85
+      }));
+    } else {
+      formattedSkills = [
+        { name: 'JavaScript', category: 'Frontend', level: 'Advanced', verified: true, score: 90 },
+        { name: 'React', category: 'Frontend', level: 'Advanced', verified: true, score: 88 },
+        { name: 'Node.js', category: 'Backend', level: 'Intermediate', verified: true, score: 82 },
+        { name: 'MongoDB', category: 'Backend', level: 'Intermediate', verified: true, score: 80 },
+      ];
+    }
 
     const student = await Student.create({
       user: user._id,
       rollNumber: rollNumber || 'STU-' + Math.floor(1000 + Math.random() * 9000),
       department: department || 'Computer Science',
       semester: semester || 6,
-      collegeName: collegeName || 'MIT Institute of Technology',
-      bio: bio || 'Aspiring software engineer excited to learn and build real-world software.',
-      skills: parsedSkills,
+      collegeName: collegeName || (extractedResumeData?.college || 'MIT Institute of Technology'),
+      bio: bio || (extractedResumeData?.rawText ? extractedResumeData.rawText.slice(0, 150) + '...' : 'Aspiring software engineer excited to learn and build real-world software.'),
+      skills: formattedSkills,
       overallProgress: 75,
       employabilityScore: 85,
+      githubUrl: githubUrl?.trim() || '',
+      resumeUrl: resumeUrl || '',
+      resumeFileName: resumeFileName || '',
+      extractedResumeData: extractedResumeData || {},
     });
 
     const token = generateToken(user._id, user.role);

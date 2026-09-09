@@ -19,28 +19,20 @@ import {
 
 export const StudentDashboard = () => {
   const [data, setData] = useState({
-    welcomeMessage: 'Welcome back, Harsh! 👋',
+    welcomeMessage: 'Welcome Back!',
     subtitle: 'Track your skills, grow and achieve your goals.',
     stats: {
-      skills: { count: 12, label: 'Competencies' },
-      projects: { count: 5, label: 'Completed' },
-      challenges: { count: 8, label: 'Participated' },
-      applications: { count: 3, label: 'Active' },
+      skills: { count: 0, label: 'Competencies' },
+      projects: { count: 0, label: 'Completed' },
+      challenges: { count: 0, label: 'Participated' },
+      applications: { count: 0, label: 'Active' },
     },
     skillsProgress: {
-      overallProgress: 75,
-      employabilityScore: 88,
+      overallProgress: 0,
+      employabilityScore: 0,
     },
-    recentActivity: [
-      { id: '1', title: 'Completed React Challenge', time: '2h ago', type: 'challenge' },
-      { id: '2', title: 'Updated Project: Portfolio', time: '1d ago', type: 'project' },
-      { id: '3', title: 'Applied for Frontend Intern', time: '2d ago', type: 'application' },
-    ],
-    upcomingOpportunities: [
-      { id: '1', title: 'Frontend Developer Intern', company: 'TechCorp', deadline: '5d left', type: 'Internship' },
-      { id: '2', title: 'UI/UX Design Challenge', company: 'DesignStudio', deadline: '1w left', type: 'Challenge' },
-      { id: '3', title: 'Web Developer Intern', company: 'CodeSoft', deadline: '8d left', type: 'Internship' },
-    ],
+    recentActivity: [],
+    upcomingOpportunities: [],
   });
 
   useEffect(() => {
@@ -51,7 +43,7 @@ export const StudentDashboard = () => {
           setData(res.data);
         }
       } catch (err) {
-        console.warn('Using default student dashboard telemetry');
+        console.warn('Unable to load student dashboard', err);
       }
     };
     fetchData();

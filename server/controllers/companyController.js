@@ -66,7 +66,7 @@ exports.getCompanyDashboard = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        welcomeMessage: 'Welcome, Riya! 💼',
+        welcomeMessage: `Welcome Back, ${req.user.name}!`,
         subtitle: 'Find and hire the best talent for your company.',
         stats: {
           openOpportunities: { count: '18', numeric: openOpportunitiesCount, label: 'Open Opportunities' },
@@ -88,63 +88,9 @@ exports.getCompanyDashboard = async (req, res, next) => {
 // @access  Private (Company)
 exports.getCompanyOpportunities = async (req, res, next) => {
   try {
-    let opportunities = await Opportunity.find().sort({ createdAt: -1 });
-
-    if (opportunities.length === 0) {
-      opportunities = [
-        {
-          _id: 'opp-1',
-          title: 'Frontend Developer Intern',
-          companyName: 'TechCorp Solutions',
-          type: 'Internship',
-          location: 'Bangalore (Hybrid)',
-          locationType: 'Hybrid',
-          stipend: '₹35,000 / month',
-          duration: '6 Months',
-          deadline: '5d left',
-          requiredSkills: ['React', 'TypeScript', 'Tailwind CSS', 'REST APIs'],
-          preferredSkills: ['Next.js', 'Redux Toolkit', 'Jest'],
-          description: 'Build modern user-facing web applications with React 18, Tailwind, and performant state pipelines.',
-          openingsCount: 4,
-          applicationsCount: 48,
-          status: 'open',
-        },
-        {
-          _id: 'opp-2',
-          title: 'Full Stack Engineer (MERN)',
-          companyName: 'TechCorp Solutions',
-          type: 'Job',
-          location: 'Bangalore / Remote',
-          locationType: 'Remote',
-          stipend: '₹14 - 18 LPA',
-          duration: 'Full Time',
-          deadline: '12d left',
-          requiredSkills: ['Node.js', 'Express', 'React', 'MongoDB', 'AWS'],
-          preferredSkills: ['Docker', 'Microservices', 'GraphQL'],
-          description: 'Design and deploy scalable backend microservices, REST endpoints, and dynamic React frontends.',
-          openingsCount: 3,
-          applicationsCount: 76,
-          status: 'open',
-        },
-        {
-          _id: 'opp-3',
-          title: 'DevOps & Cloud Engineer Intern',
-          companyName: 'TechCorp Solutions',
-          type: 'Internship',
-          location: 'Pune / On-site',
-          locationType: 'On-site',
-          stipend: '₹30,000 / month',
-          duration: '6 Months',
-          deadline: '3d left',
-          requiredSkills: ['Docker', 'Kubernetes', 'Linux', 'CI/CD'],
-          preferredSkills: ['Terraform', 'AWS Lambda', 'Prometheus'],
-          description: 'Maintain cloud clusters, configure GitHub Actions automated pipelines, and manage container deployments.',
-          openingsCount: 2,
-          applicationsCount: 32,
-          status: 'open',
-        },
-      ];
-    }
+    const company = await Company.findOne({ user: req.user.id });
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
+    const opportunities = await Opportunity.find({ company: company._id }).sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, opportunities });
   } catch (error) {
@@ -159,10 +105,8 @@ exports.createOpportunity = async (req, res, next) => {
   try {
     const { title, type, location, locationType, stipend, duration, deadline, requiredSkills, preferredSkills, description, openingsCount } = req.body;
 
-    let company = await Company.findOne({ user: req.user.id });
-    if (!company) {
-      company = await Company.create({ user: req.user.id, companyName: 'TechCorp Solutions' });
-    }
+    const company = await Company.findOne({ user: req.user.id });
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
 
     const reqSkills = Array.isArray(requiredSkills)
       ? requiredSkills

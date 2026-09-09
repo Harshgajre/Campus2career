@@ -54,7 +54,7 @@ exports.getCollegeDashboard = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        welcomeMessage: 'Welcome, Dr. Mehta! 🎓',
+        welcomeMessage: `Welcome Back, ${req.user.name}!`,
         subtitle: 'Monitor students and improve outcomes.',
         stats: {
           totalStudents: { count: '1,245', numeric: totalStudents, label: 'Total Students' },

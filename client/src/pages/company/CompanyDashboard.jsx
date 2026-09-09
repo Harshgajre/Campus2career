@@ -25,7 +25,7 @@ import {
 
 export const CompanyDashboard = () => {
   const [data, setData] = useState({
-    welcomeMessage: 'Welcome, Riya! 💼',
+    welcomeMessage: 'Welcome Back!',
     subtitle: 'Find and hire the best talent for your company.',
     stats: {
       openOpportunities: { count: '18', label: 'Open Opportunities' },

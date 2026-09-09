@@ -42,7 +42,7 @@ export const CompanyOpportunities = () => {
         setOpportunities(res.opportunities);
       }
     } catch (err) {
-      console.warn('Fallback opportunities');
+      console.warn('Unable to load opportunities', err);
     }
   };
 
@@ -61,17 +61,8 @@ export const CompanyOpportunities = () => {
         setOpportunities([res.opportunity, ...opportunities]);
       }
     } catch (err) {
-      setOpportunities([
-        {
-          _id: 'local-' + Date.now(),
-          ...formData,
-          requiredSkills: reqArray,
-          preferredSkills: prefArray,
-          applicationsCount: 0,
-          status: 'open',
-        },
-        ...opportunities,
-      ]);
+      console.warn('Unable to publish opportunity', err);
+      return;
     }
     setIsModalOpen(false);
   };

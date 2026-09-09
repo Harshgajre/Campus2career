@@ -40,7 +40,7 @@ export const MyProjects = () => {
         setProjects(res.projects);
       }
     } catch (err) {
-      console.warn('Loading fallback projects');
+      console.warn('Unable to load projects', err);
     }
   };
 
@@ -75,7 +75,7 @@ export const MyProjects = () => {
       await studentService.deleteProject(id);
       setProjects((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
-      setProjects((prev) => prev.filter((p) => p._id !== id));
+      console.warn('Unable to delete project', err);
     }
   };
 
@@ -104,17 +104,8 @@ export const MyProjects = () => {
         }
       }
     } catch (err) {
-      // Local update fallback
-      const newProj = {
-        _id: editingProject ? editingProject._id : 'local-' + Date.now(),
-        ...formData,
-        technologies: techArray,
-      };
-      if (editingProject) {
-        setProjects((prev) => prev.map((p) => (p._id === editingProject._id ? newProj : p)));
-      } else {
-        setProjects((prev) => [newProj, ...prev]);
-      }
+      console.warn('Unable to save project', err);
+      return;
     }
     setIsModalOpen(false);
   };
@@ -226,7 +217,7 @@ export const MyProjects = () => {
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5">
+              {!project.source && <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => handleOpenEdit(project)}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -239,7 +230,7 @@ export const MyProjects = () => {
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
-              </div>
+              </div>}
             </div>
           </div>
         ))}

@@ -54,7 +54,7 @@ exports.getAdminDashboard = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        welcomeMessage: 'Welcome, Super Admin! 👑',
+        welcomeMessage: req.user?.name ? `Welcome back, ${req.user.name.trim().split(' ')[0]}! 👑` : 'Welcome back! 👑',
         subtitle: 'Manage the entire platform seamlessly.',
         stats: {
           totalStudents: { count: '12,568', numeric: totalStudentsCount, label: 'Total Students' },

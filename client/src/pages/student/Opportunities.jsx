@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { publicService, studentService } from '../../services/roleServices';
+import { studentService } from '../../services/roleServices';
 import { Modal } from '../../components/common/Modal';
 import { Badge } from '../../components/common/Badge';
 import {
@@ -30,12 +30,12 @@ export const Opportunities = () => {
 
   const loadOpportunities = async () => {
     try {
-      const res = await publicService.getOpportunities();
+      const res = await studentService.getOpportunities();
       if (res.success && res.opportunities) {
         setOpportunities(res.opportunities);
       }
     } catch (err) {
-      console.warn('Using default opportunities');
+      setErrorMsg('Unable to load opportunities. Please try again.');
     }
   };
 
@@ -63,10 +63,7 @@ export const Opportunities = () => {
         setErrorMsg(res.message || 'Application failed');
       }
     } catch (err) {
-      setAppliedSuccess(true);
-      setTimeout(() => {
-        setIsApplyModalOpen(false);
-      }, 1500);
+      setErrorMsg(err.response?.data?.message || 'Application failed. Please try again.');
     }
   };
 
