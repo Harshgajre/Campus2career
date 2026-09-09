@@ -23,10 +23,14 @@ const Notification = require('../models/Notification');
 
 const seedDatabase = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/campus2career';
-    console.log(`Connecting to MongoDB at ${mongoUri}...`);
-    await mongoose.connect(mongoUri);
-    console.log('Connected to DB. Purging existing collections...');
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/campus2career';
+    console.log(`Connecting to MongoDB...`);
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+    });
+    console.log('✅ Connected to DB. Purging existing collections...');
+
 
     // Clear old data
     await User.deleteMany();
