@@ -25,11 +25,13 @@ export const CollegeLoginPage = () => {
     event.preventDefault();
     setError('');
     setLoading(true);
-    const res = await login(email, password);
+    const res = await login(email, password, 'college');
     setLoading(false);
-    if (res.success) {
+    if (res.success && res.role === 'college') {
       navigate('/college/dashboard');
-    } else setError(res.message || 'Invalid email or password');
+    } else {
+      setError(res.message || 'Invalid college credentials');
+    }
   };
 
   return (

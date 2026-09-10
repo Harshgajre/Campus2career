@@ -36,16 +36,22 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, role) => {
     try {
-      const res = await authService.login({ email, password });
+      const res = await authService.login({ email, password, role });
       if (res.success) {
+        if (role && res.user.role !== role) {
+          return {
+            success: false,
+            message: `Account is not registered as a ${role}. Please use the correct login portal.`,
+          };
+        }
         localStorage.setItem('c2c_token', res.token);
         localStorage.setItem('c2c_user', JSON.stringify(res.user));
         localStorage.setItem('c2c_user_role', res.user.role);
         setUser(res.user);
         setRoleDetails(res.roleDetails);
-        return { success: true, role: res.user.role };
+        return { success: true, role: res.user.role, user: res.user };
       }
       return { success: false, message: res.message };
     } catch (err) {

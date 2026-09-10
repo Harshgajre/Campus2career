@@ -16,13 +16,11 @@ export const AdminLoginPage = () => {
     setError('');
     setLoading(true);
 
-    const res = await login(email, password);
+    const res = await login(email, password, 'admin');
     setLoading(false);
 
     if (res.success && res.role === 'admin') {
       navigate('/admin/dashboard');
-    } else if (res.success) {
-      navigate(`/${res.role}/dashboard`);
     } else {
       setError(res.message || 'Invalid administrator credentials');
     }

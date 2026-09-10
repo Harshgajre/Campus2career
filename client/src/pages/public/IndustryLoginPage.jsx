@@ -25,11 +25,13 @@ export const IndustryLoginPage = () => {
     event.preventDefault();
     setError('');
     setLoading(true);
-    const res = await login(email, password);
+    const res = await login(email, password, 'company');
     setLoading(false);
-    if (res.success) {
+    if (res.success && res.role === 'company') {
       navigate('/company/dashboard');
-    } else setError(res.message || 'Invalid email or password');
+    } else {
+      setError(res.message || 'Invalid industry credentials');
+    }
   };
 
   return (

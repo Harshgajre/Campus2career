@@ -213,15 +213,15 @@ exports.registerCompany = async (req, res, next) => {
   }
 };
 
-// @desc    Universal Login
+// @desc    Role-isolated & Universal Login
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Please provide email and password' });
     }
 
     const user = await User.findOne({ email }).select('+password');
@@ -232,6 +232,28 @@ exports.login = async (req, res, next) => {
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Role-based login isolation check
+    if (role && user.role !== role) {
+      const roleLabels = {
+        student: 'Student',
+        college: 'College / University',
+        company: 'Company / Industry',
+        admin: 'Administrator',
+      };
+      const expectedLabel = roleLabels[role] || role;
+      return res.status(401).json({
+        success: false,
+        message: `Account is not registered as a ${expectedLabel}. Please use the correct login portal.`,
+      });
+    }
+
+    if (user.status === 'suspended') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended. Please contact support.',
+      });
     }
 
     let roleDetails = null;

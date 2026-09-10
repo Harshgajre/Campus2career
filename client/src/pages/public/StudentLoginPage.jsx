@@ -25,11 +25,13 @@ export const StudentLoginPage = () => {
     event.preventDefault();
     setError('');
     setLoading(true);
-    const res = await login(email, password);
+    const res = await login(email, password, 'student');
     setLoading(false);
-    if (res.success) {
+    if (res.success && res.role === 'student') {
       navigate('/student/dashboard');
-    } else setError(res.message || 'Invalid email or password');
+    } else {
+      setError(res.message || 'Invalid student credentials');
+    }
   };
 
   return (
