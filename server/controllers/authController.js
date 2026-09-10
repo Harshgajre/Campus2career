@@ -4,6 +4,7 @@ const College = require('../models/College');
 const Company = require('../models/Company');
 const generateToken = require('../utils/generateToken');
 const { extractTextFromFile, parseResumeData } = require('../utils/resumeParser');
+const { categorizeSkill } = require('../utils/skillCategorizer');
 
 // @desc    Parse Resume PDF/DOCX
 // @route   POST /api/auth/parse-resume
@@ -34,7 +35,11 @@ exports.parseResume = async (req, res, next) => {
 // @access  Public
 exports.registerStudent = async (req, res, next) => {
   try {
-    const { name, email, password, rollNumber, department, semester, collegeName, bio, skills, githubUrl, resumeUrl, resumeFileName, extractedResumeData } = req.body;
+    const { name, email, password, phone, rollNumber, department, semester, collegeName, skills, githubUrl, resumeUrl, resumeFileName, extractedResumeData } = req.body;
+
+    if (!phone || !/^[6-9]\d{9}$/.test(phone.trim())) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit Indian phone number' });
+    }
 
     if (githubUrl && !/^https:\/\/(www\.)?github\.com\/[A-Za-z0-9-]+\/?$/i.test(githubUrl.trim())) {
       return res.status(400).json({ success: false, message: 'Please provide a valid GitHub profile URL' });
@@ -49,48 +54,46 @@ exports.registerStudent = async (req, res, next) => {
       name,
       email,
       password,
+      phone: phone.trim(),
       role: 'student',
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
     });
 
+    // Build skills from submitted data or extracted resume — no fake defaults
     let formattedSkills = [];
     if (Array.isArray(skills) && skills.length > 0 && typeof skills[0] === 'object') {
-      formattedSkills = skills;
+      formattedSkills = skills.map(s => ({
+        ...s,
+        category: s.category && s.category !== 'Other' ? s.category : categorizeSkill(s.name),
+      }));
     } else if (Array.isArray(skills) && skills.length > 0) {
       formattedSkills = skills.map(s => ({
         name: s,
-        category: 'Frontend',
+        category: categorizeSkill(s),
         level: 'Intermediate',
-        verified: true,
-        score: 85
+        verified: false,
+        score: 75,
       }));
     } else if (extractedResumeData?.skills && extractedResumeData.skills.length > 0) {
       formattedSkills = extractedResumeData.skills.map(s => ({
         name: s,
-        category: 'Frontend',
+        category: categorizeSkill(s),
         level: 'Intermediate',
-        verified: true,
-        score: 85
+        verified: false,
+        score: 75,
       }));
-    } else {
-      formattedSkills = [
-        { name: 'JavaScript', category: 'Frontend', level: 'Advanced', verified: true, score: 90 },
-        { name: 'React', category: 'Frontend', level: 'Advanced', verified: true, score: 88 },
-        { name: 'Node.js', category: 'Backend', level: 'Intermediate', verified: true, score: 82 },
-        { name: 'MongoDB', category: 'Backend', level: 'Intermediate', verified: true, score: 80 },
-      ];
     }
+    // If no skills provided, student starts with empty skills — they can add via My Skills page
 
     const student = await Student.create({
       user: user._id,
-      rollNumber: rollNumber || 'STU-' + Math.floor(1000 + Math.random() * 9000),
+      rollNumber: rollNumber || '',
       department: department || 'Computer Science',
       semester: semester || 6,
-      collegeName: collegeName || (extractedResumeData?.college || 'MIT Institute of Technology'),
-      bio: bio || (extractedResumeData?.rawText ? extractedResumeData.rawText.slice(0, 150) + '...' : 'Aspiring software engineer excited to learn and build real-world software.'),
+      collegeName: collegeName || (extractedResumeData?.college || ''),
       skills: formattedSkills,
-      overallProgress: 75,
-      employabilityScore: 85,
+      overallProgress: 0,
+      employabilityScore: 0,
       githubUrl: githubUrl?.trim() || '',
       resumeUrl: resumeUrl || '',
       resumeFileName: resumeFileName || '',
@@ -108,6 +111,7 @@ exports.registerStudent = async (req, res, next) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        phone: user.phone,
       },
       student,
     });
@@ -170,7 +174,11 @@ exports.registerCollege = async (req, res, next) => {
 // @access  Public
 exports.registerCompany = async (req, res, next) => {
   try {
-    const { name, email, password, companyName, industryType, location, website } = req.body;
+    const { name, email, password, companyName, gstNumber, industryType, location, website } = req.body;
+
+    if (!gstNumber || !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(gstNumber.trim().toUpperCase())) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid 15-character GST Number (e.g. 22AAAAA0000A1Z5)' });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -178,20 +186,21 @@ exports.registerCompany = async (req, res, next) => {
     }
 
     const user = await User.create({
-      name: name || 'Riya Patel',
+      name: name || 'HR Representative',
       email,
       password,
       role: 'company',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(companyName || name)}`,
     });
 
     const company = await Company.create({
       user: user._id,
-      companyName: companyName || 'TechCorp Solutions',
+      companyName: companyName || name,
+      gstNumber: gstNumber.trim().toUpperCase(),
       industryType: industryType || 'Information Technology & Software',
-      location: location || 'Bangalore, India',
-      website: website || 'https://techcorp.example.com',
-      hrName: name || 'Riya Patel',
+      location: location || 'India',
+      website: website || '',
+      hrName: name || 'HR Representative',
     });
 
     const token = generateToken(user._id, user.role);

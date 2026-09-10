@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
-  Bell,
   Sun,
   Moon,
   ChevronDown,
@@ -10,35 +9,25 @@ import {
   Settings,
   LogOut,
   Menu,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Sparkles,
 } from 'lucide-react';
 import { ProfileModal } from './ProfileModal';
 import { SettingsModal } from './SettingsModal';
-import { NotificationDropdown } from './NotificationDropdown';
 
 export const Header = ({ onToggleSidebar, role = 'student' }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme, isDark } = useTheme();
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const dropdownRef = useRef(null);
-  const notifRef = useRef(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowProfileDropdown(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -76,23 +65,8 @@ export const Header = ({ onToggleSidebar, role = 'student' }) => {
           </button>
         </div>
 
-        {/* Right Side: Theme Toggle, Notifications, Profile Section */}
+        {/* Right Side: Theme Toggle, Profile Section */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Notifications Bell */}
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors relative"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500"></span>
-            </button>
-
-            {showNotifications && (
-              <NotificationDropdown onClose={() => setShowNotifications(false)} role={role} />
-            )}
-          </div>
 
           {/* Light / Dark Theme Toggle Button */}
           <button

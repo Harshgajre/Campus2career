@@ -129,6 +129,14 @@ export const companyService = {
     const res = await API.get('/companies/interns');
     return res.data;
   },
+  getChallenges: async () => {
+    const res = await API.get('/companies/challenges');
+    return res.data;
+  },
+  createChallenge: async (data) => {
+    const res = await API.post('/companies/challenges', data);
+    return res.data;
+  },
 };
 
 export const adminService = {

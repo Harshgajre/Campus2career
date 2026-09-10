@@ -29,7 +29,7 @@ const studentSchema = new mongoose.Schema(
       ref: 'College',
     },
     collegeName: { type: String, default: 'MIT Institute of Technology' },
-    rollNumber: { type: String, default: 'STU-2024-001' },
+    rollNumber: { type: String, default: '' },
     department: {
       type: String,
       enum: ['Computer Science', 'Information Technology', 'AI & Data Science', 'Electronics', 'Mechanical', 'Other'],

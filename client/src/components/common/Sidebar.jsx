@@ -11,6 +11,7 @@ import {
   Briefcase,
   FileText,
   Award,
+  User,
   Users,
   BarChart3,
   GitCompare,
@@ -46,7 +47,7 @@ export const Sidebar = ({ role = 'student', isOpen, onClose, isCollapsed }) => {
         { name: 'Learning Roadmap', path: '/student/roadmap', icon: Map },
         { name: 'Opportunities', path: '/student/opportunities', icon: Briefcase },
         { name: 'My Applications', path: '/student/applications', icon: FileText },
-        { name: 'Skill Passport', path: '/student/passport', icon: Award },
+        { name: 'Profile', path: '/student/passport', icon: User },
       ],
     },
     college: {

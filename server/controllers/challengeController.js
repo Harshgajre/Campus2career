@@ -7,55 +7,7 @@ const Student = require('../models/Student');
 // @access  Public
 exports.getChallenges = async (req, res, next) => {
   try {
-    let challenges = await Challenge.find().sort({ createdAt: -1 });
-
-    if (challenges.length === 0) {
-      challenges = [
-        {
-          _id: 'chal-1',
-          title: 'React & Tailwind Enterprise Dashboard UI',
-          companyName: 'TechCorp Solutions',
-          organizerRole: 'Industry Sponsor',
-          description: 'Design and build a responsive analytics dashboard with dark mode and Recharts telemetry.',
-          difficulty: 'Intermediate',
-          category: 'Frontend Development',
-          requiredSkills: ['React', 'Tailwind CSS', 'Recharts', 'State Management'],
-          deadline: '1w left',
-          prizePoints: '₹25,000 + Direct Interview Call',
-          participantsCount: 142,
-          status: 'active',
-        },
-        {
-          _id: 'chal-2',
-          title: 'High-Concurrency Rate Limiter & Cache in Go/Node.js',
-          companyName: 'CodeSoft Global',
-          organizerRole: 'Infrastructure Sponsor',
-          description: 'Build a distributed token-bucket rate limiter backed by Redis with sub-millisecond response times.',
-          difficulty: 'Advanced',
-          category: 'Backend & Distributed Systems',
-          requiredSkills: ['Node.js', 'Redis', 'Docker', 'System Design'],
-          deadline: '4d left',
-          prizePoints: '₹35,000 + Internship Offer',
-          participantsCount: 88,
-          status: 'active',
-        },
-        {
-          _id: 'chal-3',
-          title: 'SIH AI Skill Passport Verifier & Radar Scoring',
-          companyName: 'Campus2Career Core Team',
-          organizerRole: 'Platform Challenge',
-          description: 'Develop an AI algorithm that parses student GitHub projects and produces a verifiable skill score.',
-          difficulty: 'Advanced',
-          category: 'AI & Data Science',
-          requiredSkills: ['Python', 'FastAPI', 'OpenAI API', 'React'],
-          deadline: '2w left',
-          prizePoints: '₹50,000 + Gold Badge',
-          participantsCount: 210,
-          status: 'active',
-        },
-      ];
-    }
-
+    const challenges = await Challenge.find({ status: 'active' }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: challenges.length, challenges });
   } catch (error) {
     next(error);

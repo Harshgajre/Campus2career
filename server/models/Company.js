@@ -37,6 +37,7 @@ const companySchema = new mongoose.Schema(
     totalCandidatesCount: { type: Number, default: 320 },
     shortlistedCount: { type: Number, default: 64 },
     interviewsCount: { type: Number, default: 26 },
+    gstNumber: { type: String, default: '' },
   },
   { timestamps: true }
 );

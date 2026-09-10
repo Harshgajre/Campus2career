@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { studentService } from '../../services/roleServices';
 import { Modal } from '../../components/common/Modal';
-import { Badge } from '../../components/common/Badge';
 import {
   Sparkles,
   Plus,
   Search,
-  CheckCircle2,
-  Trash2,
-  Edit2,
-  Award,
-  Filter,
-  BarChart,
+  Code2,
   Loader2,
 } from 'lucide-react';
 
@@ -20,18 +14,15 @@ export const MySkills = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSkill, setEditingSkill] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
     category: 'Frontend',
     level: 'Intermediate',
-    score: 85,
   });
 
-  const categories = ['All', 'Frontend', 'Backend', 'Data Science & AI', 'DevOps & Cloud', 'Core CS', 'UI/UX'];
+  const categories = ['Frontend', 'Backend', 'Data Science & AI', 'DevOps & Cloud', 'Core CS', 'Mobile', 'UI/UX', 'Other'];
 
   useEffect(() => {
     loadSkills();
@@ -55,63 +46,28 @@ export const MySkills = () => {
   };
 
   const handleOpenAdd = () => {
-    setEditingSkill(null);
-    setFormData({ name: '', category: 'Frontend', level: 'Intermediate', score: 85 });
+    setFormData({ name: '', category: 'Frontend', level: 'Intermediate' });
     setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (skill) => {
-    setEditingSkill(skill);
-    setFormData({
-      name: skill.name,
-      category: skill.category,
-      level: skill.level,
-      score: skill.score || 85,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      const res = await studentService.deleteSkill(id);
-      if (res.success) {
-        setSkills((prev) => prev.filter((s) => s._id !== id));
-      }
-    } catch (err) {
-      setSkills((prev) => prev.filter((s) => s._id !== id));
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingSkill) {
-        const res = await studentService.updateSkill(editingSkill._id, formData);
-        if (res.success) setSkills(res.skills);
-      } else {
-        const res = await studentService.addSkill(formData);
-        if (res.success) setSkills(res.skills);
+      const res = await studentService.addSkill(formData);
+      if (res.success && res.skills) {
+        setSkills(res.skills);
       }
     } catch (err) {
-      // Fallback local update
-      if (editingSkill) {
-        setSkills((prev) =>
-          prev.map((s) => (s._id === editingSkill._id ? { ...s, ...formData } : s))
-        );
-      } else {
-        setSkills((prev) => [
-          ...prev,
-          { _id: 'local-' + Date.now(), ...formData, verified: false },
-        ]);
-      }
+      setSkills((prev) => [
+        ...prev,
+        { _id: 'local-' + Date.now(), ...formData },
+      ]);
     }
     setIsModalOpen(false);
   };
 
   const filteredSkills = skills.filter((skill) => {
-    const matchesSearch = skill.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || skill.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return skill.name?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   return (
@@ -121,10 +77,10 @@ export const MySkills = () => {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-blue-500" />
-            My Skills & Competencies
+            My Skills
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Manage your verified skills passport, evaluate proficiency, and track benchmarks.
+            Showcase your skills, build your profile, and track your career growth.
           </p>
         </div>
 
@@ -133,40 +89,21 @@ export const MySkills = () => {
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          Add New Skill
+          Add Skill
         </button>
       </div>
 
-      {/* Controls: Search & Category Chips */}
-      <div className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
+      {/* Controls: Search */}
+      <div className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 shadow-sm">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search competencies (e.g., React, Node.js, Python)..."
+            placeholder="Search skills (e.g. React, Node.js, Python)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
-            <Filter className="w-3 h-3" /> Categories:
-          </span>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                selectedCategory === cat
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -190,10 +127,10 @@ export const MySkills = () => {
         <div className="bg-white dark:bg-[#111C38] border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center">
           <Sparkles className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-            No Skills Added Yet
+            No Skills Found
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4">
-            Add your first skill to build your Digital Skill Passport and personalized Learning Roadmap.
+            Upload your resume or add your skills to build your profile.
           </p>
           <button
             onClick={handleOpenAdd}
@@ -207,80 +144,36 @@ export const MySkills = () => {
 
       {/* Skills Grid */}
       {!loading && !error && skills.length > 0 && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSkills.map((skill) => (
-
-          <div
-            key={skill._id}
-            className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all group flex flex-col justify-between shadow-sm"
-          >
-            <div>
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-500 transition-colors">
-                  {skill.name}
-                </h3>
-                {skill.verified ? (
-                  <Badge variant="verified" size="xs">
-                    <CheckCircle2 className="w-3 h-3" /> Verified
-                  </Badge>
-                ) : (
-                  <Badge variant="default" size="xs">
-                    Self-Assessed
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
-                <span>{skill.category}</span>
-                <span>•</span>
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {skill.level}
-                </span>
-              </div>
-
-              {/* Score Bar */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Mastery Score</span>
-                  <span className="font-bold text-blue-500">{skill.score || 85}%</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredSkills.map((skill, idx) => (
+            <div
+              key={skill._id || idx}
+              className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all flex items-center justify-between shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-500 flex items-center justify-center flex-shrink-0">
+                  <Code2 className="w-4 h-4" />
                 </div>
-                <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                    style={{ width: `${skill.score || 85}%` }}
-                  />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {skill.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {skill.category || 'Skill'} • {skill.level || 'Intermediate'}
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-end gap-2">
-              <button
-                onClick={() => handleOpenEdit(skill)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Edit Skill"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => handleDelete(skill._id)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Delete Skill"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
-      {/* Add / Edit Skill Modal */}
+      {/* Add Skill Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingSkill ? 'Edit Skill Competency' : 'Add New Skill Competency'}
-        subtitle="Skills are synchronized with your public Digital Skill Passport"
+        title="Add Skill"
+        subtitle="Add a technical skill to your profile"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -289,7 +182,7 @@ export const MySkills = () => {
             </label>
             <input
               type="text"
-              placeholder="e.g. Next.js 14, Docker, Python"
+              placeholder="e.g. React.js, Python, Docker"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -307,7 +200,7 @@ export const MySkills = () => {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {categories.filter((c) => c !== 'All').map((c) => (
+                {categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -330,23 +223,6 @@ export const MySkills = () => {
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Self Assessment Mastery Score
-              </label>
-              <span className="text-xs font-bold text-blue-500">{formData.score}%</span>
-            </div>
-            <input
-              type="range"
-              min="50"
-              max="100"
-              value={formData.score}
-              onChange={(e) => setFormData({ ...formData, score: Number(e.target.value) })}
-              className="w-full accent-blue-600"
-            />
-          </div>
-
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
@@ -359,7 +235,7 @@ export const MySkills = () => {
               type="submit"
               className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm"
             >
-              {editingSkill ? 'Update Skill' : 'Save Competency'}
+              Save Skill
             </button>
           </div>
         </form>

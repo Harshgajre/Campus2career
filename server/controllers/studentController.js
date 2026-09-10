@@ -5,6 +5,7 @@ const Opportunity = require('../models/Opportunity');
 const Application = require('../models/Application');
 const Challenge = require('../models/Challenge');
 const Notification = require('../models/Notification');
+const { categorizeSkill } = require('../utils/skillCategorizer');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -166,6 +167,7 @@ exports.getStudentDashboard = async (req, res, next) => {
 };
 
 // @desc    Get All Student Skills
+// @desc    Get All Student Skills (real skills from resume + GitHub repos)
 // @route   GET /api/students/skills
 // @access  Private (Student)
 exports.getStudentSkills = async (req, res, next) => {
@@ -173,7 +175,54 @@ exports.getStudentSkills = async (req, res, next) => {
     const student = await Student.findOne({ user: req.user.id });
     if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
 
-    res.status(200).json({ success: true, skills: student.skills });
+    const rawSkillNames = new Set();
+
+    // 1. From student.skills in DB
+    (student.skills || []).forEach((sk) => {
+      if (sk && sk.name && sk.name.trim()) rawSkillNames.add(sk.name.trim());
+    });
+
+    // 2. From extracted resume data
+    (student.extractedResumeData?.skills || []).forEach((name) => {
+      if (name && typeof name === 'string' && name.trim()) rawSkillNames.add(name.trim());
+    });
+
+    // 3. From student's GitHub repos (if githubUrl provided)
+    const githubMatch = student.githubUrl?.match(/^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9-]+)\/?$/i);
+    if (githubMatch) {
+      try {
+        const response = await fetch(`https://api.github.com/users/${githubMatch[1]}/repos?sort=updated&per_page=100`, {
+          headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Campus2Career' },
+        });
+        if (response.ok) {
+          const repos = await response.json();
+          repos.forEach((r) => {
+            if (r.language && typeof r.language === 'string') rawSkillNames.add(r.language.trim());
+          });
+        }
+      } catch (_) {}
+    }
+
+    // Deduplicate case-insensitively and accurately categorize
+    const seen = new Map();
+    Array.from(rawSkillNames).forEach((name) => {
+      const key = name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.set(key, {
+          name,
+          category: categorizeSkill(name),
+          level: 'Intermediate',
+        });
+      }
+    });
+
+    const uniqueSkills = Array.from(seen.values());
+
+    // Save back to DB to maintain consistency
+    student.skills = uniqueSkills;
+    await student.save();
+
+    res.status(200).json({ success: true, skills: uniqueSkills });
   } catch (error) {
     next(error);
   }
@@ -184,7 +233,7 @@ exports.getStudentSkills = async (req, res, next) => {
 // @access  Private (Student)
 exports.addStudentSkill = async (req, res, next) => {
   try {
-    const { name, category, level, score } = req.body;
+    const { name, category, level } = req.body;
     let student = await Student.findOne({ user: req.user.id });
 
     if (!student) {
@@ -194,12 +243,12 @@ exports.addStudentSkill = async (req, res, next) => {
       });
     }
 
+    const assignedCategory = category && category !== 'Other' ? category : categorizeSkill(name);
+
     const newSkill = {
       name,
-      category: category || 'Frontend',
+      category: assignedCategory,
       level: level || 'Intermediate',
-      verified: false,
-      score: score || 80,
     };
 
     student.skills.push(newSkill);
@@ -385,58 +434,33 @@ exports.deleteStudentProject = async (req, res, next) => {
 // @access  Private (Student)
 exports.getStudentPassport = async (req, res, next) => {
   try {
-    const student = await Student.findOne({ user: req.user.id }).populate('user', 'name email avatar');
+    const student = await Student.findOne({ user: req.user.id }).populate('user', 'name email avatar phone');
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student profile not found' });
     }
 
     const skills = student.skills || [];
-    const verifiedSkillsCount = skills.filter((s) => s.verified).length;
-    const totalCompetencies = skills.length;
 
-    // Top 5 skills by score
-    const topSkills = [...skills]
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
-      .slice(0, 5)
-      .map((sk) => ({
-        name: sk.name,
-        score: sk.score || 0,
-        level: sk.level || 'Intermediate',
-        verified: sk.verified || false,
-      }));
-
-    // Radar chart: computed from real skill categories
-    const radarMetrics = buildRadarMetrics(skills);
-
-    // Certifications: from extracted resume data (may be empty — no fake fallback)
     const certifications = (student.extractedResumeData?.certifications || []).map((c) => ({
       title: typeof c === 'string' ? c : c.title || c.name || String(c),
       issuer: c.issuer || c.organization || '',
       date: c.date || c.year || '',
-      badge: 'Verified',
     }));
 
-    // Employability / progress derived from real data
-    const computedEmployability = totalCompetencies > 0
-      ? Math.min(100, Math.round((verifiedSkillsCount / totalCompetencies) * 100 * 0.4 + (student.employabilityScore || 0) * 0.6))
-      : student.employabilityScore || 0;
-
     const passportData = {
-      passportId: student.passportId || `C2C-${student._id.toString().slice(-8).toUpperCase()}`,
+      passportId: student.passportId || '',
       studentName: student.user?.name || '',
+      email: student.user?.email || '',
+      phone: student.user?.phone || '',
+      rollNumber: student.rollNumber || '',
       avatar: student.user?.avatar || '',
       collegeName: student.collegeName || '',
       department: student.department || '',
-      semester: student.semester || null,
-      cgpa: student.cgpa || null,
-      overallProgress: student.overallProgress || 0,
-      employabilityScore: computedEmployability,
-      verifiedSkillsCount,
-      totalCompetencies,
-      issuedDate: student.createdAt ? new Date(student.createdAt).toISOString().split('T')[0] : '',
-      verificationHash: `0x${student._id.toString().repeat(2).slice(0, 38)}`,
-      topSkills,
-      radarMetrics,
+      skills: skills.map((sk) => ({
+        name: sk.name,
+        category: sk.category || 'Other',
+        level: sk.level || 'Intermediate',
+      })),
       certifications,
     };
 

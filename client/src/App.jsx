@@ -24,7 +24,7 @@ import { SkillChallenges } from './pages/student/SkillChallenges';
 import { LearningRoadmap } from './pages/student/LearningRoadmap';
 import { Opportunities } from './pages/student/Opportunities';
 import { MyApplications } from './pages/student/MyApplications';
-import { SkillPassport } from './pages/student/SkillPassport';
+import { StudentProfile } from './pages/student/StudentProfile';
 
 // College Pages
 import { CollegeDashboard } from './pages/college/CollegeDashboard';
@@ -202,7 +202,7 @@ export default function App() {
           path="/student/passport"
           element={
             <ProtectedRoute allowedRoles={['student']}>
-              <SkillPassport />
+              <StudentProfile />
             </ProtectedRoute>
           }
         />

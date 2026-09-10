@@ -15,6 +15,7 @@ import {
 
 export const SkillChallenges = () => {
   const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [repoUrl, setRepoUrl] = useState('');
@@ -28,12 +29,17 @@ export const SkillChallenges = () => {
 
   const loadChallenges = async () => {
     try {
+      setLoading(true);
       const res = await publicService.getChallenges();
       if (res.success && res.challenges) {
-        setChallenges(res.challenges);
+        // Deduplicate by ID
+        const unique = Array.from(new Map(res.challenges.map(c => [c._id, c])).values());
+        setChallenges(unique);
       }
     } catch (err) {
-      console.warn('Fallback challenges loaded');
+      setChallenges([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +63,7 @@ export const SkillChallenges = () => {
         });
       }
     } catch (err) {
-      console.warn('Local submission recorded');
+      // submission recorded
     }
     setSubmitted(true);
     setTimeout(() => {
@@ -79,8 +85,24 @@ export const SkillChallenges = () => {
       </div>
 
       {/* Challenge Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {challenges.map((challenge) => (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <div className="w-8 h-8 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+          <p className="text-xs text-slate-500 dark:text-slate-400">Loading industry challenges...</p>
+        </div>
+      ) : challenges.length === 0 ? (
+        <div className="bg-white dark:bg-[#111C38] border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl p-12 text-center">
+          <Trophy className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
+            No Active Industry Challenges
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+            Companies post new hackathons and problem statements frequently. Check back soon!
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {challenges.map((challenge) => (
           <div
             key={challenge._id}
             className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all group flex flex-col justify-between shadow-sm"
@@ -149,6 +171,7 @@ export const SkillChallenges = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Submission Modal */}
       <Modal
