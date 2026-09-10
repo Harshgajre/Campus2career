@@ -15,76 +15,85 @@ import {
   ChevronRight,
   Briefcase,
   Layers,
+  Loader2,
 } from 'lucide-react';
 
 export const StudentDashboard = () => {
-  const [data, setData] = useState({
-    welcomeMessage: 'Welcome Back!',
-    subtitle: 'Track your skills, grow and achieve your goals.',
-    stats: {
-      skills: { count: 0, label: 'Competencies' },
-      projects: { count: 0, label: 'Completed' },
-      challenges: { count: 0, label: 'Participated' },
-      applications: { count: 0, label: 'Active' },
-    },
-    skillsProgress: {
-      overallProgress: 0,
-      employabilityScore: 0,
-    },
-    recentActivity: [],
-    upcomingOpportunities: [],
-  });
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await studentService.getDashboard();
         if (res.success && res.data) {
           setData(res.data);
         }
       } catch (err) {
         console.warn('Unable to load student dashboard', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+        <p className="text-xs text-slate-500 dark:text-slate-400">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  const stats = data?.stats || {
+    skills: { count: 0, label: 'Competencies' },
+    projects: { count: 0, label: 'Completed' },
+    challenges: { count: 0, label: 'Participated' },
+    applications: { count: 0, label: 'Active' },
+  };
+  const skillsProgress = data?.skillsProgress || { overallProgress: 0, employabilityScore: 0 };
+  const recentActivity = data?.recentActivity || [];
+  const upcomingOpportunities = data?.upcomingOpportunities || [];
 
   return (
     <div className="space-y-6">
       {/* Top Welcome Title Banner */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {data.welcomeMessage}
+          {data?.welcomeMessage || 'Welcome Back!'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {data.subtitle}
+          {data?.subtitle || 'Track your skills, grow and achieve your goals.'}
         </p>
       </div>
 
-      {/* 4 Stat Cards in Grid (Exact Layout from Reference Image) */}
+      {/* 4 Stat Cards in Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
           title="Skills"
-          value={data.stats.skills.count}
-          subtitle={data.stats.skills.label}
+          value={stats.skills.count}
+          subtitle={stats.skills.label}
           role="student"
         />
         <StatCard
           title="Projects"
-          value={data.stats.projects.count}
-          subtitle={data.stats.projects.label}
+          value={stats.projects.count}
+          subtitle={stats.projects.label}
           role="student"
         />
         <StatCard
           title="Challenges"
-          value={data.stats.challenges.count}
-          subtitle={data.stats.challenges.label}
+          value={stats.challenges.count}
+          subtitle={stats.challenges.label}
           role="student"
         />
         <StatCard
           title="Applications"
-          value={data.stats.applications.count}
-          subtitle={data.stats.applications.label}
+          value={stats.applications.count}
+          subtitle={stats.applications.label}
           role="student"
         />
       </div>
@@ -101,7 +110,7 @@ export const StudentDashboard = () => {
 
           <div className="py-4">
             <CircularProgress
-              percentage={data.skillsProgress.overallProgress}
+              percentage={skillsProgress.overallProgress}
               size={150}
               strokeWidth={10}
               label="Overall Progress"
@@ -112,7 +121,7 @@ export const StudentDashboard = () => {
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span className="text-slate-500 dark:text-slate-400 font-medium">Employability Index</span>
             <span className="font-bold text-purple-600 dark:text-purple-400">
-              {data.skillsProgress.employabilityScore}% Match
+              {skillsProgress.employabilityScore}% Match
             </span>
           </div>
         </div>
@@ -132,24 +141,32 @@ export const StudentDashboard = () => {
           </div>
 
           <div className="space-y-3.5 divide-y divide-slate-100 dark:divide-slate-800/60 flex-1">
-            {data.recentActivity.map((activity, idx) => (
-              <div
-                key={activity.id || idx}
-                className={`flex items-center justify-between pt-3.5 first:pt-0 group`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full border border-purple-500/40 bg-purple-50/50 dark:bg-purple-950/40 flex items-center justify-center text-purple-500 flex-shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+            {recentActivity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Clock className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-2" />
+                <p className="text-xs text-slate-400 dark:text-slate-500">No recent activity yet.</p>
+                <p className="text-[11px] text-slate-400 mt-1">Apply to opportunities to see activity here.</p>
+              </div>
+            ) : (
+              recentActivity.map((activity, idx) => (
+                <div
+                  key={activity.id || idx}
+                  className={`flex items-center justify-between pt-3.5 first:pt-0 group`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full border border-purple-500/40 bg-purple-50/50 dark:bg-purple-950/40 flex items-center justify-center text-purple-500 flex-shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-purple-500 transition-colors">
+                      {activity.title}
+                    </span>
                   </div>
-                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-purple-500 transition-colors">
-                    {activity.title}
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500 whitespace-nowrap ml-2">
+                    {activity.time}
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 whitespace-nowrap ml-2">
-                  {activity.time}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-right">
@@ -178,38 +195,51 @@ export const StudentDashboard = () => {
         </div>
 
         <div className="space-y-3">
-          {data.upcomingOpportunities.map((opp) => (
-            <div
-              key={opp.id}
-              className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 hover:border-purple-500/50 transition-all group"
-            >
-              <div className="flex items-center gap-3.5">
-                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
-                  <Briefcase className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-purple-500 transition-colors">
-                    {opp.title}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    {opp.company}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2.5 py-1 rounded-full border border-purple-200/60 dark:border-purple-800/60">
-                  {opp.deadline}
-                </span>
-                <Link
-                  to="/student/opportunities"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </div>
+          {upcomingOpportunities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Briefcase className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-2" />
+              <p className="text-xs text-slate-400 dark:text-slate-500">No open opportunities right now.</p>
+              <Link
+                to="/student/opportunities"
+                className="mt-2 text-xs text-purple-600 dark:text-purple-400 font-semibold hover:underline"
+              >
+                Browse all opportunities
+              </Link>
             </div>
-          ))}
+          ) : (
+            upcomingOpportunities.map((opp) => (
+              <div
+                key={opp.id}
+                className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 hover:border-purple-500/50 transition-all group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-purple-500 transition-colors">
+                      {opp.title}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      {opp.company}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2.5 py-1 rounded-full border border-purple-200/60 dark:border-purple-800/60">
+                    {opp.deadline}
+                  </span>
+                  <Link
+                    to="/student/opportunities"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -5,74 +5,17 @@ import {
   Map,
   CheckCircle2,
   Circle,
-  Clock,
   Sparkles,
   ExternalLink,
   BookOpen,
-  Award,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
 
 export const LearningRoadmap = () => {
-  const [roadmap, setRoadmap] = useState({
-    careerTrack: 'Full Stack Cloud Architect',
-    overallCompletion: 68,
-    recommendedSkills: ['Next.js 14 Server Actions', 'Docker & Kubernetes', 'GraphQL APIs', 'Redis Caching'],
-    modules: [
-      {
-        id: 'mod-1',
-        title: 'Phase 1: Advanced Frontend & State Architecture',
-        status: 'completed',
-        progress: 100,
-        milestones: [
-          { name: 'React 18 Hooks, Custom Hooks & Optimization', done: true },
-          { name: 'Tailwind CSS Custom Design Systems', done: true },
-          { name: 'State Management with Context & Zustand', done: true },
-          { name: 'Client-side Routing & Protected Guards', done: true },
-        ],
-      },
-      {
-        id: 'mod-2',
-        title: 'Phase 2: Scalable Backend Services & APIs',
-        status: 'completed',
-        progress: 100,
-        milestones: [
-          { name: 'Node.js Event Loop & Stream Architecture', done: true },
-          { name: 'Express RESTful Endpoints with JWT Authentication', done: true },
-          { name: 'MongoDB Aggregations & Schema Indexing', done: true },
-          { name: 'Role-based Middleware & Error Handling', done: true },
-        ],
-      },
-      {
-        id: 'mod-3',
-        title: 'Phase 3: Microservices, Caching & Cloud Deployment',
-        status: 'in-progress',
-        progress: 55,
-        milestones: [
-          { name: 'Docker Containerization for Multi-container Apps', done: true },
-          { name: 'Redis Cache Layer for API Response Optimization', done: true },
-          { name: 'CI/CD Pipelines with GitHub Actions', done: false },
-          { name: 'Kubernetes Pod Deployment & Load Balancing', done: false },
-        ],
-      },
-      {
-        id: 'mod-4',
-        title: 'Phase 4: System Design & Enterprise Scale',
-        status: 'upcoming',
-        progress: 0,
-        milestones: [
-          { name: 'Distributed Systems & High Availability Architecture', done: false },
-          { name: 'Kafka / RabbitMQ Event Driven Architecture', done: false },
-          { name: 'Security Audits, Rate Limiting & Penetration Testing', done: false },
-        ],
-      },
-    ],
-    curatedResources: [
-      { title: 'Full Stack Open 2026', provider: 'University of Helsinki', type: 'Course', url: 'https://fullstackopen.com' },
-      { title: 'System Design Primer', provider: 'GitHub Open Source', type: 'Guide', url: 'https://github.com/donnemartin/system-design-primer' },
-      { title: 'Docker & Kubernetes Mastery', provider: 'Cloud Native Foundation', type: 'Hands-on Lab', url: 'https://kubernetes.io/docs/tutorials/' },
-    ],
-  });
+  const [roadmap, setRoadmap] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadRoadmap();
@@ -80,12 +23,18 @@ export const LearningRoadmap = () => {
 
   const loadRoadmap = async () => {
     try {
+      setLoading(true);
+      setError('');
       const res = await studentService.getRoadmap();
       if (res.success && res.roadmap) {
         setRoadmap(res.roadmap);
+      } else {
+        setError('Could not load roadmap.');
       }
     } catch (err) {
-      console.warn('Fallback roadmap');
+      setError('Unable to load your Learning Roadmap. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,8 +51,51 @@ export const LearningRoadmap = () => {
     else if (updatedModules[modIndex].progress > 0) updatedModules[modIndex].status = 'in-progress';
     else updatedModules[modIndex].status = 'upcoming';
 
-    setRoadmap({ ...roadmap, modules: updatedModules });
+    // Recalculate overall completion
+    const totalProgress = updatedModules.reduce((sum, m) => sum + m.progress, 0);
+    const overallCompletion = updatedModules.length > 0
+      ? Math.round(totalProgress / updatedModules.length)
+      : 0;
+
+    setRoadmap({ ...roadmap, modules: updatedModules, overallCompletion });
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <p className="text-xs text-slate-500 dark:text-slate-400">Building your personalized roadmap...</p>
+      </div>
+    );
+  }
+
+  // Empty state: no skills added yet
+  const hasModules = roadmap && roadmap.modules && roadmap.modules.length > 0;
+
+  if (error || !roadmap || !hasModules) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <Map className="w-6 h-6 text-blue-500" />
+            Learning Roadmap
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Your personalized week-by-week skill learning plan.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-[#111C38] border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center">
+          <Map className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+            No Roadmap Generated Yet
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            Add your skills from the <strong>My Skills</strong> page and your personalized week-by-week learning roadmap will be automatically generated.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -112,13 +104,13 @@ export const LearningRoadmap = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> AI Recommended Learning Path
+              <Sparkles className="w-3.5 h-3.5" /> Personalized Learning Path
             </span>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
               {roadmap.careerTrack}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Curated based on your verified skills, market demand gaps, and target recruiter profiles.
+              Based on your verified skills — one skill per week, at your own pace.
             </p>
           </div>
 
@@ -137,19 +129,21 @@ export const LearningRoadmap = () => {
       </div>
 
       {/* Recommended Skills Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto text-xs pb-1">
-        <span className="text-[11px] font-semibold text-slate-400 whitespace-nowrap">
-          Top In-Demand Skills to Learn:
-        </span>
-        {roadmap.recommendedSkills.map((sk, idx) => (
-          <span
-            key={idx}
-            className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 font-medium whitespace-nowrap text-xs"
-          >
-            + {sk}
+      {roadmap.recommendedSkills && roadmap.recommendedSkills.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto text-xs pb-1">
+          <span className="text-[11px] font-semibold text-slate-400 whitespace-nowrap">
+            Skills to Add Next:
           </span>
-        ))}
-      </div>
+          {roadmap.recommendedSkills.map((sk, idx) => (
+            <span
+              key={idx}
+              className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 font-medium whitespace-nowrap text-xs"
+            >
+              + {sk}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Roadmap Modules Timeline */}
       <div className="space-y-4">
@@ -228,36 +222,38 @@ export const LearningRoadmap = () => {
       </div>
 
       {/* Curated Resources */}
-      <div className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-        <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-blue-500" />
-          Recommended Free Industry Resources
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {roadmap.curatedResources.map((res, idx) => (
-            <a
-              key={idx}
-              href={res.url}
-              target="_blank"
-              rel="noreferrer"
-              className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 hover:border-blue-500/60 transition-all flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">
-                  {res.type}
+      {roadmap.curatedResources && roadmap.curatedResources.length > 0 && (
+        <div className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-blue-500" />
+            Recommended Free Industry Resources
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {roadmap.curatedResources.map((res, idx) => (
+              <a
+                key={idx}
+                href={res.url}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 hover:border-blue-500/60 transition-all flex flex-col justify-between group"
+              >
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">
+                    {res.type}
+                  </span>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-500 transition-colors mt-1">
+                    {res.title}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{res.provider}</p>
+                </div>
+                <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                  Explore Resource <ExternalLink className="w-3 h-3" />
                 </span>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-500 transition-colors mt-1">
-                  {res.title}
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">{res.provider}</p>
-              </div>
-              <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
-                Explore Resource <ExternalLink className="w-3 h-3" />
-              </span>
-            </a>
-          ))}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

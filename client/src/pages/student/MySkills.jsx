@@ -12,10 +12,13 @@ import {
   Award,
   Filter,
   BarChart,
+  Loader2,
 } from 'lucide-react';
 
 export const MySkills = () => {
   const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,12 +39,18 @@ export const MySkills = () => {
 
   const loadSkills = async () => {
     try {
+      setLoading(true);
+      setError('');
       const res = await studentService.getSkills();
       if (res.success && res.skills) {
         setSkills(res.skills);
+      } else {
+        setError('Could not load skills.');
       }
     } catch (err) {
-      console.warn('Loading fallback skills');
+      setError('Unable to load your skills. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,9 +170,46 @@ export const MySkills = () => {
         </div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <Loader2 className="w-7 h-7 text-blue-500 animate-spin" />
+          <p className="text-xs text-slate-400">Loading your skills...</p>
+        </div>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl p-4 text-xs text-rose-600 dark:text-rose-400">
+          {error}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && skills.length === 0 && (
+        <div className="bg-white dark:bg-[#111C38] border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center">
+          <Sparkles className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+            No Skills Added Yet
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4">
+            Add your first skill to build your Digital Skill Passport and personalized Learning Roadmap.
+          </p>
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Add Your First Skill
+          </button>
+        </div>
+      )}
+
       {/* Skills Grid */}
+      {!loading && !error && skills.length > 0 && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredSkills.map((skill) => (
+
           <div
             key={skill._id}
             className="bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all group flex flex-col justify-between shadow-sm"
@@ -227,6 +273,7 @@ export const MySkills = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Add / Edit Skill Modal */}
       <Modal

@@ -181,7 +181,7 @@ export const Header = ({ onToggleSidebar, role = 'student' }) => {
                   onClick={() => {
                     setShowProfileDropdown(false);
                     logout();
-                    window.location.href = '/login';
+                    window.location.href = '/';
                   }}
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                 >

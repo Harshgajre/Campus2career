@@ -6,7 +6,96 @@ const Application = require('../models/Application');
 const Challenge = require('../models/Challenge');
 const Notification = require('../models/Notification');
 
-// @desc    Get Student Dashboard Data (Exact metrics from Reference Image)
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const formatTimeAgo = (date) => {
+  if (!date) return '';
+  const diffMs = Date.now() - new Date(date).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  return `${diffDays}d ago`;
+};
+
+const formatDeadline = (date) => {
+  const diffMs = new Date(date).getTime() - Date.now();
+  if (diffMs <= 0) return 'Expired';
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 1) return '1d left';
+  if (diffDays < 7) return `${diffDays}d left`;
+  const diffWeeks = Math.ceil(diffDays / 7);
+  return `${diffWeeks}w left`;
+};
+
+// Build radar metrics from student skills grouped by category
+const buildRadarMetrics = (skills) => {
+  const categoryMap = {
+    'Frontend': 0,
+    'Backend': 0,
+    'Data Science & AI': 0,
+    'DevOps & Cloud': 0,
+    'Core CS': 0,
+    'Mobile': 0,
+    'UI/UX': 0,
+    'Other': 0,
+  };
+  const counts = { ...categoryMap };
+
+  skills.forEach((sk) => {
+    const cat = sk.category || 'Other';
+    if (categoryMap[cat] !== undefined) {
+      categoryMap[cat] += sk.score || 0;
+      counts[cat] += 1;
+    }
+  });
+
+  const subjectLabels = {
+    'Frontend': 'Frontend',
+    'Backend': 'Backend',
+    'Data Science & AI': 'Data & AI',
+    'DevOps & Cloud': 'DevOps',
+    'Core CS': 'Core CS',
+    'UI/UX': 'UI/UX',
+  };
+
+  return Object.keys(subjectLabels)
+    .map((cat) => ({
+      subject: subjectLabels[cat],
+      A: counts[cat] > 0 ? Math.round(categoryMap[cat] / counts[cat]) : 0,
+      fullMark: 100,
+    }))
+    .filter((m) => m.A > 0);
+};
+
+// Milestones for a given skill name
+const buildMilestones = (skillName, weekNum) => [
+  { name: `Learn core fundamentals of ${skillName}`, done: false },
+  { name: `Build a mini project using ${skillName}`, done: false },
+  { name: `Practice interview questions on ${skillName}`, done: false },
+  { name: `Add ${skillName} to your Skill Passport`, done: false },
+];
+
+// Derive career track label from skill categories
+const deriveCareerTrack = (skills) => {
+  if (!skills || skills.length === 0) return 'Full Stack Developer';
+  const cats = skills.map((s) => s.category || 'Other');
+  const hasFrontend = cats.includes('Frontend');
+  const hasBackend = cats.includes('Backend');
+  const hasAI = cats.includes('Data Science & AI');
+  const hasDevOps = cats.includes('DevOps & Cloud');
+  if (hasAI) return 'AI/ML Engineer';
+  if (hasDevOps && hasBackend) return 'Cloud Backend Engineer';
+  if (hasFrontend && hasBackend) return 'Full Stack Developer';
+  if (hasFrontend) return 'Frontend Developer';
+  if (hasBackend) return 'Backend Developer';
+  return 'Software Developer';
+};
+
+// ─── Controllers ─────────────────────────────────────────────────────────────
+
+// @desc    Get Student Dashboard Data
 // @route   GET /api/students/dashboard
 // @access  Private (Student)
 exports.getStudentDashboard = async (req, res, next) => {
@@ -20,66 +109,37 @@ exports.getStudentDashboard = async (req, res, next) => {
     const activeApplicationsCount = await Application.countDocuments({
       student: student._id,
       status: { $in: ['Applied', 'Under Review', 'Shortlisted', 'Interview Scheduled'] },
-    }) || 3;
+    });
 
-    // Upcoming Opportunities (Matching Reference design items)
-    const upcomingOpportunities = [
-      {
-        id: '1',
-        title: 'Frontend Developer Intern',
-        company: 'TechCorp',
-        deadline: '5d left',
-        type: 'Internship',
-        stipend: '₹35,000 / mo',
-        skills: ['React', 'TypeScript', 'Tailwind CSS'],
-        icon: 'code',
-      },
-      {
-        id: '2',
-        title: 'UI/UX Design Challenge',
-        company: 'DesignStudio',
-        deadline: '1w left',
-        type: 'Challenge',
-        stipend: '₹25,000 Prize',
-        skills: ['Figma', 'Prototyping', 'Design Systems'],
-        icon: 'palette',
-      },
-      {
-        id: '3',
-        title: 'Web Developer Intern',
-        company: 'CodeSoft',
-        deadline: '8d left',
-        type: 'Internship',
-        stipend: '₹28,000 / mo',
-        skills: ['JavaScript', 'Node.js', 'Express'],
-        icon: 'globe',
-      },
-    ];
+    // Real recent activity: last 3 applications by this student
+    const recentApplications = await Application.find({ student: student._id })
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean();
 
-    // Recent Activity timeline (Matching Reference design items)
-    const recentActivity = [
-      {
-        id: 'act-1',
-        title: 'Completed React Challenge',
-        time: '2h ago',
-        type: 'challenge',
-        status: 'success',
-      },
-      {
-        id: 'act-2',
-        title: 'Updated Project: Portfolio',
-        time: '1d ago',
-        type: 'project',
-        status: 'info',
-      },
-      {
-        id: 'act-3',
-        title: 'Applied for Frontend Intern',
-        time: '2d ago',
-        type: 'application',
-        status: 'primary',
-      },
-    ];
+    const recentActivity = recentApplications.map((app) => ({
+      id: app._id.toString(),
+      title: `Applied for ${app.opportunityTitle || 'an opportunity'}${app.companyName ? ` at ${app.companyName}` : ''}`,
+      time: formatTimeAgo(app.createdAt),
+      type: 'application',
+      status: app.status,
+    }));
+
+    // Real upcoming opportunities from DB
+    const openOpportunities = await Opportunity.find({ status: 'open' })
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean();
+
+    const upcomingOpportunities = openOpportunities.map((opp) => ({
+      id: opp._id.toString(),
+      title: opp.title,
+      company: opp.companyName || '',
+      deadline: opp.deadline ? formatDeadline(opp.deadline) : 'Open',
+      type: opp.type || 'Internship',
+      stipend: opp.stipend || opp.salary || '',
+      skills: opp.requiredSkills || [],
+    }));
 
     res.status(200).json({
       success: true,
@@ -320,51 +380,64 @@ exports.deleteStudentProject = async (req, res, next) => {
   }
 };
 
-// @desc    Get Digital Skill Passport
+// @desc    Get Digital Skill Passport (real student data only)
 // @route   GET /api/students/passport
-// @access  Private / Public
+// @access  Private (Student)
 exports.getStudentPassport = async (req, res, next) => {
   try {
-    let student = await Student.findOne({ user: req.user ? req.user.id : null }).populate('user');
+    const student = await Student.findOne({ user: req.user.id }).populate('user', 'name email avatar');
     if (!student) {
-      student = await Student.findOne().populate('user');
+      return res.status(404).json({ success: false, message: 'Student profile not found' });
     }
 
+    const skills = student.skills || [];
+    const verifiedSkillsCount = skills.filter((s) => s.verified).length;
+    const totalCompetencies = skills.length;
+
+    // Top 5 skills by score
+    const topSkills = [...skills]
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .slice(0, 5)
+      .map((sk) => ({
+        name: sk.name,
+        score: sk.score || 0,
+        level: sk.level || 'Intermediate',
+        verified: sk.verified || false,
+      }));
+
+    // Radar chart: computed from real skill categories
+    const radarMetrics = buildRadarMetrics(skills);
+
+    // Certifications: from extracted resume data (may be empty — no fake fallback)
+    const certifications = (student.extractedResumeData?.certifications || []).map((c) => ({
+      title: typeof c === 'string' ? c : c.title || c.name || String(c),
+      issuer: c.issuer || c.organization || '',
+      date: c.date || c.year || '',
+      badge: 'Verified',
+    }));
+
+    // Employability / progress derived from real data
+    const computedEmployability = totalCompetencies > 0
+      ? Math.min(100, Math.round((verifiedSkillsCount / totalCompetencies) * 100 * 0.4 + (student.employabilityScore || 0) * 0.6))
+      : student.employabilityScore || 0;
+
     const passportData = {
-      passportId: student ? student.passportId : 'C2C-PASSPORT-2026-HG01',
-      studentName: student && student.user ? student.user.name : 'Harsh Gajre',
-      avatar: student && student.user ? student.user.avatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-      collegeName: student ? student.collegeName : 'MIT Institute of Technology',
-      department: student ? student.department : 'Computer Science',
-      semester: student ? student.semester : 6,
-      cgpa: student ? student.cgpa : 8.9,
-      overallProgress: 75,
-      employabilityScore: 88,
-      verifiedSkillsCount: 10,
-      totalCompetencies: 12,
-      issuedDate: '2026-01-15',
-      verificationHash: '0x8f2a93b4e10c7654321fedcba9876543210',
-      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://campus2career.io/verify/C2C-PASSPORT-2026-HG01`,
-      topSkills: [
-        { name: 'JavaScript & React', score: 94, level: 'Expert', verified: true },
-        { name: 'Node.js & Express', score: 86, level: 'Advanced', verified: true },
-        { name: 'Data Structures & Algorithms', score: 88, level: 'Advanced', verified: true },
-        { name: 'Tailwind CSS & UI Systems', score: 92, level: 'Expert', verified: true },
-        { name: 'MongoDB & Database Design', score: 82, level: 'Advanced', verified: true },
-      ],
-      radarMetrics: [
-        { subject: 'Coding & DSA', A: 90, fullMark: 100 },
-        { subject: 'System Design', A: 78, fullMark: 100 },
-        { subject: 'Frontend', A: 95, fullMark: 100 },
-        { subject: 'Backend', A: 85, fullMark: 100 },
-        { subject: 'DevOps & Git', A: 80, fullMark: 100 },
-        { subject: 'Problem Solving', A: 92, fullMark: 100 },
-      ],
-      certifications: [
-        { title: 'Meta Certified Full Stack Developer', issuer: 'Meta', date: '2026-03-10', badge: 'Certified' },
-        { title: 'AWS Cloud Practitioner Foundational', issuer: 'Amazon Web Services', date: '2025-11-20', badge: 'Verified' },
-        { title: 'SIH Finalist Hackathon Badge', issuer: 'Ministry of Education', date: '2025-12-18', badge: 'Top 1%' },
-      ],
+      passportId: student.passportId || `C2C-${student._id.toString().slice(-8).toUpperCase()}`,
+      studentName: student.user?.name || '',
+      avatar: student.user?.avatar || '',
+      collegeName: student.collegeName || '',
+      department: student.department || '',
+      semester: student.semester || null,
+      cgpa: student.cgpa || null,
+      overallProgress: student.overallProgress || 0,
+      employabilityScore: computedEmployability,
+      verifiedSkillsCount,
+      totalCompetencies,
+      issuedDate: student.createdAt ? new Date(student.createdAt).toISOString().split('T')[0] : '',
+      verificationHash: `0x${student._id.toString().repeat(2).slice(0, 38)}`,
+      topSkills,
+      radarMetrics,
+      certifications,
     };
 
     res.status(200).json({ success: true, passport: passportData });
@@ -373,72 +446,76 @@ exports.getStudentPassport = async (req, res, next) => {
   }
 };
 
-// @desc    Get Student Learning Roadmap
+// @desc    Get Student Learning Roadmap (dynamic, based on actual skills)
 // @route   GET /api/students/roadmap
 // @access  Private (Student)
 exports.getStudentRoadmap = async (req, res, next) => {
   try {
-    const roadmap = {
-      careerTrack: 'Full Stack Cloud Architect',
-      overallCompletion: 68,
-      recommendedSkills: ['Next.js 14 Server Actions', 'Docker & Kubernetes', 'GraphQL APIs', 'Redis Caching'],
-      modules: [
-        {
-          id: 'mod-1',
-          title: 'Phase 1: Advanced Frontend & State Architecture',
-          status: 'completed',
-          progress: 100,
-          milestones: [
-            { name: 'React 18 Hooks, Custom Hooks & Optimization', done: true },
-            { name: 'Tailwind CSS Custom Design Systems', done: true },
-            { name: 'State Management with Context & Zustand', done: true },
-            { name: 'Client-side Routing & Protected Guards', done: true },
-          ],
-        },
-        {
-          id: 'mod-2',
-          title: 'Phase 2: Scalable Backend Services & APIs',
-          status: 'completed',
-          progress: 100,
-          milestones: [
-            { name: 'Node.js Event Loop & Stream Architecture', done: true },
-            { name: 'Express RESTful Endpoints with JWT Authentication', done: true },
-            { name: 'MongoDB Aggregations & Schema Indexing', done: true },
-            { name: 'Role-based Middleware & Error Handling', done: true },
-          ],
-        },
-        {
-          id: 'mod-3',
-          title: 'Phase 3: Microservices, Caching & Cloud Deployment',
-          status: 'in-progress',
-          progress: 55,
-          milestones: [
-            { name: 'Docker Containerization for Multi-container Apps', done: true },
-            { name: 'Redis Cache Layer for API Response Optimization', done: true },
-            { name: 'CI/CD Pipelines with GitHub Actions', done: false },
-            { name: 'Kubernetes Pod Deployment & Load Balancing', done: false },
-          ],
-        },
-        {
-          id: 'mod-4',
-          title: 'Phase 4: System Design & Enterprise Scale',
-          status: 'upcoming',
-          progress: 0,
-          milestones: [
-            { name: 'Distributed Systems & High Availability Architecture', done: false },
-            { name: 'Kafka / RabbitMQ Event Driven Architecture', done: false },
-            { name: 'Security Audits, Rate Limiting & Penetration Testing', done: false },
-          ],
-        },
-      ],
-      curatedResources: [
-        { title: 'Full Stack Open 2026', provider: 'University of Helsinki', type: 'Course', free: true, url: 'https://fullstackopen.com' },
-        { title: 'System Design Primer', provider: 'GitHub Open Source', type: 'Guide', free: true, url: 'https://github.com/donnemartin/system-design-primer' },
-        { title: 'Docker & Kubernetes Mastery', provider: 'Cloud Native Foundation', type: 'Hands-on Lab', free: true, url: 'https://kubernetes.io/docs/tutorials/' },
-      ],
-    };
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
 
-    res.status(200).json({ success: true, roadmap });
+    const skills = student.skills || [];
+
+    // No skills → return empty roadmap so frontend can show empty state
+    if (skills.length === 0) {
+      return res.status(200).json({
+        success: true,
+        roadmap: {
+          careerTrack: '',
+          overallCompletion: 0,
+          recommendedSkills: [],
+          modules: [],
+          curatedResources: [],
+        },
+      });
+    }
+
+    // Take up to 4 skills (sorted by score desc) — Week N = Skill N
+    const roadmapSkills = [...skills]
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .slice(0, 4);
+
+    const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+
+    const modules = roadmapSkills.map((skill, idx) => ({
+      id: `mod-${idx + 1}`,
+      title: `${weekLabels[idx]}: ${skill.name}`,
+      status: 'upcoming',
+      progress: 0,
+      milestones: buildMilestones(skill.name, idx + 1),
+    }));
+
+    const careerTrack = deriveCareerTrack(skills);
+
+    // Recommended skills = common skills not already in the student's list
+    const allSkillNames = skills.map((s) => s.name.toLowerCase());
+    const commonSkills = [
+      'System Design', 'Docker', 'AWS', 'TypeScript', 'GraphQL', 'Redis',
+      'Next.js', 'PostgreSQL', 'Kubernetes', 'CI/CD', 'React', 'Node.js',
+    ];
+    const recommendedSkills = commonSkills
+      .filter((s) => !allSkillNames.includes(s.toLowerCase()))
+      .slice(0, 4);
+
+    const curatedResources = [
+      { title: 'Full Stack Open', provider: 'University of Helsinki', type: 'Course', free: true, url: 'https://fullstackopen.com' },
+      { title: 'System Design Primer', provider: 'GitHub Open Source', type: 'Guide', free: true, url: 'https://github.com/donnemartin/system-design-primer' },
+      { title: 'Roadmap.sh', provider: 'roadmap.sh', type: 'Roadmap', free: true, url: 'https://roadmap.sh' },
+    ];
+
+    // Overall completion: average of module progress (all 0 since freshly generated)
+    const overallCompletion = 0;
+
+    res.status(200).json({
+      success: true,
+      roadmap: {
+        careerTrack,
+        overallCompletion,
+        recommendedSkills,
+        modules,
+        curatedResources,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -492,7 +569,7 @@ exports.applyOpportunity = async (req, res, next) => {
       companyName: opportunity.companyName,
       status: 'Applied',
       matchScore: 88,
-      coverNote: coverNote || 'Excited to bring my full-stack skills to this role.',
+      coverNote: coverNote || '',
       resumeUrl: student.resumeUrl,
     });
 

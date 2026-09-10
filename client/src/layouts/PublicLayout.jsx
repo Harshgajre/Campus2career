@@ -14,6 +14,7 @@ export const PublicLayout = () => {
   const navigate = useNavigate();
   const authPaths = ['/login', '/login/student', '/login/college', '/login/university', '/login/industry', '/login/company', '/register/student', '/register/college', '/register/company'];
   const isAuthPage = authPaths.includes(location.pathname);
+  const isRoleSelectionPage = location.pathname === '/';
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const dropdownRef = useRef(null);
@@ -64,7 +65,7 @@ export const PublicLayout = () => {
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
 
-            {user && (
+            {user && !isRoleSelectionPage && (
               /* Logged In - Show Profile Avatar and Name */
               <div className="relative" ref={dropdownRef}>
                 <button

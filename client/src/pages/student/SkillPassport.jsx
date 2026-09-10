@@ -4,16 +4,12 @@ import { Badge } from '../../components/common/Badge';
 import {
   Award,
   ShieldCheck,
-  QrCode,
   Printer,
-  Download,
   Share2,
   CheckCircle2,
-  Star,
   Sparkles,
-  ExternalLink,
-  Code,
-  Layers,
+  Loader2,
+  BookOpen,
 } from 'lucide-react';
 import {
   Radar,
@@ -25,41 +21,9 @@ import {
 } from 'recharts';
 
 export const SkillPassport = () => {
-  const [passport, setPassport] = useState({
-    passportId: 'C2C-PASSPORT-2026-HG01',
-    studentName: 'Harsh Gajre',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-    collegeName: 'MIT Institute of Technology',
-    department: 'Computer Science',
-    semester: 6,
-    cgpa: 8.9,
-    overallProgress: 75,
-    employabilityScore: 88,
-    verifiedSkillsCount: 10,
-    totalCompetencies: 12,
-    issuedDate: '2026-01-15',
-    verificationHash: '0x8f2a93b4e10c7654321fedcba9876543210',
-    topSkills: [
-      { name: 'JavaScript & React', score: 94, level: 'Expert', verified: true },
-      { name: 'Node.js & Express', score: 86, level: 'Advanced', verified: true },
-      { name: 'Data Structures & Algorithms', score: 88, level: 'Advanced', verified: true },
-      { name: 'Tailwind CSS & UI Systems', score: 92, level: 'Expert', verified: true },
-      { name: 'MongoDB & Database Design', score: 82, level: 'Advanced', verified: true },
-    ],
-    radarMetrics: [
-      { subject: 'Coding & DSA', A: 90, fullMark: 100 },
-      { subject: 'System Design', A: 78, fullMark: 100 },
-      { subject: 'Frontend', A: 95, fullMark: 100 },
-      { subject: 'Backend', A: 85, fullMark: 100 },
-      { subject: 'DevOps & Git', A: 80, fullMark: 100 },
-      { subject: 'Problem Solving', A: 92, fullMark: 100 },
-    ],
-    certifications: [
-      { title: 'Meta Certified Full Stack Developer', issuer: 'Meta', date: '2026-03-10', badge: 'Certified' },
-      { title: 'AWS Cloud Practitioner Foundational', issuer: 'Amazon Web Services', date: '2025-11-20', badge: 'Verified' },
-      { title: 'SIH Finalist Hackathon Badge', issuer: 'Ministry of Education', date: '2025-12-18', badge: 'Top 1%' },
-    ],
-  });
+  const [passport, setPassport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadPassport();
@@ -67,18 +31,58 @@ export const SkillPassport = () => {
 
   const loadPassport = async () => {
     try {
+      setLoading(true);
+      setError('');
       const res = await studentService.getPassport();
       if (res.success && res.passport) {
         setPassport(res.passport);
+      } else {
+        setError('Could not load passport data.');
       }
     } catch (err) {
-      console.warn('Using default passport');
+      setError('Unable to load your Skill Passport. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePrint = () => {
     window.print();
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <p className="text-xs text-slate-500 dark:text-slate-400">Loading your Skill Passport...</p>
+      </div>
+    );
+  }
+
+  if (error || !passport) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <Award className="w-6 h-6 text-blue-500" />
+            Digital Skill Passport
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Your tamper-proof, verifiable digital career credential.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-[#111C38] border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center">
+          <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+            No Skill Passport Found
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            Add skills to your profile and your Digital Skill Passport will be generated automatically.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,26 +148,32 @@ export const SkillPassport = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             {/* Student Info */}
             <div className="md:col-span-8 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-              <img
-                src={passport.avatar}
-                alt={passport.studentName}
-                className="w-24 h-24 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md flex-shrink-0"
-              />
+              {passport.avatar ? (
+                <img
+                  src={passport.avatar}
+                  alt={passport.studentName}
+                  className="w-24 h-24 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md flex-shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-black flex-shrink-0">
+                  {passport.studentName?.[0] || '?'}
+                </div>
+              )}
               <div className="space-y-1">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
-                    {passport.studentName}
+                    {passport.studentName || '—'}
                   </h3>
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
                 </div>
                 <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  {passport.department} • Semester {passport.semester} (CGPA: {passport.cgpa})
+                  {[passport.department, passport.semester ? `Semester ${passport.semester}` : null, passport.cgpa ? `CGPA: ${passport.cgpa}` : null].filter(Boolean).join(' • ')}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {passport.collegeName}
+                  {passport.collegeName || ''}
                 </p>
                 <p className="text-[11px] text-slate-400 font-mono pt-1">
-                  Issued: {passport.issuedDate} • Hash: {passport.verificationHash.slice(0, 16)}...
+                  Issued: {passport.issuedDate} • Hash: {passport.verificationHash?.slice(0, 16)}...
                 </p>
               </div>
             </div>
@@ -178,7 +188,7 @@ export const SkillPassport = () => {
               <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 mt-2 uppercase tracking-wider">
                 Scan to Verify Online
               </span>
-              <span className="text-[9px] text-slate-400">SIH Cryptographic Seal</span>
+              <span className="text-[9px] text-slate-400">Cryptographic Seal</span>
             </div>
           </div>
 
@@ -187,13 +197,13 @@ export const SkillPassport = () => {
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400">Employability Score</span>
               <p className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-                {passport.employabilityScore}%
+                {passport.employabilityScore || 0}%
               </p>
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400">Overall Progress</span>
               <p className="text-2xl font-black text-slate-800 dark:text-slate-200 mt-0.5">
-                {passport.overallProgress}%
+                {passport.overallProgress || 0}%
               </p>
             </div>
             <div>
@@ -203,9 +213,9 @@ export const SkillPassport = () => {
               </p>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400">SIH Benchmark</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Skills</span>
               <p className="text-2xl font-black text-amber-500 mt-0.5">
-                Top 5%
+                {passport.totalCompetencies}
               </p>
             </div>
           </div>
@@ -215,29 +225,35 @@ export const SkillPassport = () => {
             {/* Top Skills List */}
             <div className="lg:col-span-7 space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Core Verified Competencies
+                Core Competencies
               </h4>
-              {passport.topSkills.map((sk, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-[#131F3B] flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <div>
-                      <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {sk.name}
-                      </h5>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        Level: {sk.level}
-                      </span>
+              {passport.topSkills && passport.topSkills.length > 0 ? (
+                passport.topSkills.map((sk, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-[#131F3B] flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${sk.verified ? 'text-blue-500' : 'text-slate-400'}`} />
+                      <div>
+                        <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {sk.name}
+                        </h5>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          Level: {sk.level}
+                        </span>
+                      </div>
                     </div>
+                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-lg border border-blue-200/60 dark:border-blue-800/60">
+                      {sk.score} / 100
+                    </span>
                   </div>
-                  <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-lg border border-blue-200/60 dark:border-blue-800/60">
-                    {sk.score} / 100
-                  </span>
+                ))
+              ) : (
+                <div className="p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center text-xs text-slate-400">
+                  No skills added yet. Add skills to populate your passport.
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Recharts Radar Matrix */}
@@ -245,22 +261,28 @@ export const SkillPassport = () => {
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Multi-Dimensional Skill Radar
               </h4>
-              <div className="w-full h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="75%" data={passport.radarMetrics}>
-                    <PolarGrid stroke="#334155" opacity={0.3} />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94A3B8', fontSize: 10 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#94A3B8', fontSize: 8 }} />
-                    <Radar
-                      name="Harsh Gajre"
-                      dataKey="A"
-                      stroke="#3B82F6"
-                      fill="#3B82F6"
-                      fillOpacity={0.4}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
+              {passport.radarMetrics && passport.radarMetrics.length > 0 ? (
+                <div className="w-full h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="75%" data={passport.radarMetrics}>
+                      <PolarGrid stroke="#334155" opacity={0.3} />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#94A3B8', fontSize: 10 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#94A3B8', fontSize: 8 }} />
+                      <Radar
+                        name={passport.studentName}
+                        dataKey="A"
+                        stroke="#3B82F6"
+                        fill="#3B82F6"
+                        fillOpacity={0.4}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="w-full h-40 flex items-center justify-center text-xs text-slate-400">
+                  Add skills across different categories to see your radar chart.
+                </div>
+              )}
             </div>
           </div>
 
@@ -269,25 +291,31 @@ export const SkillPassport = () => {
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
               Certifications & Industry Achievements
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {passport.certifications.map((cert, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 flex flex-col justify-between"
-                >
-                  <div>
-                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">
-                      {cert.badge}
-                    </span>
-                    <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
-                      {cert.title}
-                    </h5>
-                    <p className="text-[11px] text-slate-400">{cert.issuer}</p>
+            {passport.certifications && passport.certifications.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {passport.certifications.map((cert, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 flex flex-col justify-between"
+                  >
+                    <div>
+                      <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">
+                        {cert.badge || 'Verified'}
+                      </span>
+                      <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+                        {cert.title}
+                      </h5>
+                      <p className="text-[11px] text-slate-400">{cert.issuer}</p>
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-2">{cert.date}</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 mt-2">{cert.date}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center text-xs text-slate-400">
+                No certifications found. Upload your resume to extract certifications automatically.
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -120,17 +120,17 @@ export const LandingPage = () => {
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
                 Track batch competency analytics, identify industry skill gaps, schedule bootcamps, and manage placements.
               </p>
-            </div>
-            <button
-              onClick={() => handleQuickDemo('college')}
-              className="mt-6 flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:gap-2 transition-all"
-            >
-              Open College Portal <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+            </div >
+  <button
+    onClick={() => handleQuickDemo('college')}
+    className="mt-6 flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:gap-2 transition-all"
+  >
+    Open College Portal <ChevronRight className="w-4 h-4" />
+  </button>
+          </div >
 
-          {/* Company Card */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-emerald-500/60 transition-all flex flex-col justify-between">
+  {/* Company Card */ }
+  < div className = "p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-emerald-500/60 transition-all flex flex-col justify-between" >
             <div>
               <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
                 <Building2 className="w-5 h-5" />
@@ -148,10 +148,10 @@ export const LandingPage = () => {
             >
               Open Company Portal <ChevronRight className="w-4 h-4" />
             </button>
-          </div>
+          </div >
 
-          {/* Admin Card */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-orange-500/60 transition-all flex flex-col justify-between">
+  {/* Admin Card */ }
+  < div className = "p-6 rounded-2xl bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-orange-500/60 transition-all flex flex-col justify-between" >
             <div>
               <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
                 <Users className="w-5 h-5" />
@@ -169,9 +169,9 @@ export const LandingPage = () => {
             >
               Open Admin Portal <ChevronRight className="w-4 h-4" />
             </button>
-          </div>
-        </div>
-      </section>
-    </div>
+          </div >
+        </div >
+      </section >
+    </div >
   );
 };
