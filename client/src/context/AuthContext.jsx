@@ -49,24 +49,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: res.message };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Login failed' };
-    }
-  };
-
-  const demoLogin = async (role) => {
-    try {
-      const res = await authService.demoLogin(role);
-      if (res.success) {
-        localStorage.setItem('c2c_token', res.token);
-        localStorage.setItem('c2c_user', JSON.stringify(res.user));
-        localStorage.setItem('c2c_user_role', role);
-        setUser(res.user);
-        setRoleDetails(res.roleDetails);
-        return { success: true, role: res.user.role };
-      }
-      return { success: false, message: res.message };
-    } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Backend is unavailable' };
+      return { success: false, message: err.response?.data?.message || 'Invalid email or password' };
     }
   };
 
@@ -94,6 +77,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('c2c_token');
     localStorage.removeItem('c2c_user');
     localStorage.removeItem('c2c_user_role');
+    sessionStorage.removeItem('c2c_token');
+    sessionStorage.removeItem('c2c_user');
+    sessionStorage.removeItem('c2c_user_role');
     setUser(null);
     setRoleDetails(null);
   };
@@ -121,7 +107,6 @@ export const AuthProvider = ({ children }) => {
         roleDetails,
         loading,
         login,
-        demoLogin,
         register,
         logout,
         updateProfile,

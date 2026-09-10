@@ -13,7 +13,7 @@ import {
 
 export const CollegeLoginPage = () => {
   const navigate = useNavigate();
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,11 +29,7 @@ export const CollegeLoginPage = () => {
     setLoading(false);
     if (res.success) {
       navigate('/college/dashboard');
-    } else {
-      const demoRes = await demoLogin('college');
-      if (demoRes.success) navigate('/college/dashboard');
-      else setError(res.message || 'Invalid credentials');
-    }
+    } else setError(res.message || 'Invalid email or password');
   };
 
   return (

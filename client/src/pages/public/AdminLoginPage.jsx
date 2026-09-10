@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, Lock, Mail, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, Mail } from 'lucide-react';
 
 export const AdminLoginPage = () => {
   const navigate = useNavigate();
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,15 +28,6 @@ export const AdminLoginPage = () => {
     }
   };
 
-  const handleQuickAdminDemo = async () => {
-    setLoading(true);
-    const res = await demoLogin('admin');
-    setLoading(false);
-    if (res.success) {
-      navigate('/admin/dashboard');
-    }
-  };
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md bg-white dark:bg-[#111C38] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8">
@@ -51,15 +42,6 @@ export const AdminLoginPage = () => {
             Restricted system administrator authentication
           </p>
         </div>
-
-        <button
-          type="button"
-          onClick={handleQuickAdminDemo}
-          className="w-full mb-5 py-2.5 px-4 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 font-semibold text-xs transition-all flex items-center justify-center gap-2"
-        >
-          <span>⚡ 1-Click Super Admin Sign In</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
 
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-medium">

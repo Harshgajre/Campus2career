@@ -13,7 +13,7 @@ import {
 
 export const IndustryLoginPage = () => {
   const navigate = useNavigate();
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,11 +29,7 @@ export const IndustryLoginPage = () => {
     setLoading(false);
     if (res.success) {
       navigate('/company/dashboard');
-    } else {
-      const demoRes = await demoLogin('company');
-      if (demoRes.success) navigate('/company/dashboard');
-      else setError(res.message || 'Invalid credentials');
-    }
+    } else setError(res.message || 'Invalid email or password');
   };
 
   return (

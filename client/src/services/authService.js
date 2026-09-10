@@ -5,10 +5,6 @@ export const authService = {
     const response = await API.post('/auth/login', credentials);
     return response.data;
   },
-  demoLogin: async (role) => {
-    const response = await API.post('/auth/demo-login', { role });
-    return response.data;
-  },
   registerStudent: async (data) => {
     const response = await API.post('/auth/register-student', data);
     return response.data;

@@ -221,7 +221,7 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide an email and password' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
     const user = await User.findOne({ email }).select('+password');
@@ -328,58 +328,6 @@ exports.updateProfile = async (req, res, next) => {
         status: user.status,
         themePreference: user.themePreference,
       },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Quick Demo Login
-// @route   POST /api/auth/demo-login
-// @access  Public
-exports.demoLogin = async (req, res, next) => {
-  try {
-    const { role } = req.body;
-    let targetEmail = 'harsh@campus2career.com';
-
-    if (role === 'college') targetEmail = 'mehta@campus2career.com';
-    else if (role === 'company') targetEmail = 'riya@techcorp.com';
-    else if (role === 'admin') targetEmail = 'admin@campus2career.com';
-
-    let user = await User.findOne({ email: targetEmail });
-    if (!user) {
-      user = await User.findOne({ role });
-    }
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: `Demo user for role ${role} not found. Please run seed script.` });
-    }
-
-    let roleDetails = null;
-    if (user.role === 'student') {
-      roleDetails = await Student.findOne({ user: user._id });
-    } else if (user.role === 'college') {
-      roleDetails = await College.findOne({ user: user._id });
-    } else if (user.role === 'company') {
-      roleDetails = await Company.findOne({ user: user._id });
-    }
-
-    const token = generateToken(user._id, user.role);
-
-    res.status(200).json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        phone: user.phone,
-        status: user.status,
-        themePreference: user.themePreference,
-      },
-      roleDetails,
     });
   } catch (error) {
     next(error);
