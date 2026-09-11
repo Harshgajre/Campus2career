@@ -5,6 +5,11 @@ const Company = require('../models/Company');
 const generateToken = require('../utils/generateToken');
 const { extractTextFromFile, parseResumeData } = require('../utils/resumeParser');
 const { categorizeSkill } = require('../utils/skillCategorizer');
+const axios = require('axios');
+const crypto = require('crypto');
+
+// In-memory store for DigiLocker OAuth state parameters (use Redis in production)
+const digiLockerStates = new Map();
 
 // @desc    Parse Resume PDF/DOCX
 // @route   POST /api/auth/parse-resume
@@ -362,5 +367,129 @@ exports.updateProfile = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// ─── DigiLocker OAuth 2.0 ─────────────────────────────────────────────────────
+
+const DIGILOCKER_AUTH_URL = 'https://digilocker.meripehchaan.gov.in/public/oauth2/1/authorize';
+const DIGILOCKER_TOKEN_URL = 'https://digilocker.meripehchaan.gov.in/public/oauth2/1/token';
+const DIGILOCKER_USER_URL = 'https://digilocker.meripehchaan.gov.in/public/oauth2/1/user';
+
+// @desc    Initiate DigiLocker OAuth 2.0 flow (Student only)
+// @route   GET /api/auth/digilocker
+// @access  Public
+exports.initiateDigiLocker = (req, res) => {
+  const clientId = process.env.DIGILOCKER_CLIENT_ID;
+  const redirectUri = process.env.DIGILOCKER_REDIRECT_URI;
+
+  if (!clientId || clientId === 'YOUR_CLIENT_ID_HERE') {
+    return res.status(503).json({
+      success: false,
+      message: 'DigiLocker integration is not configured. Please set DIGILOCKER_CLIENT_ID in server .env',
+    });
+  }
+
+  // Generate a random state parameter for CSRF protection
+  const state = crypto.randomBytes(32).toString('hex');
+  digiLockerStates.set(state, { createdAt: Date.now() });
+
+  // Clean up expired states (older than 10 minutes)
+  for (const [key, val] of digiLockerStates) {
+    if (Date.now() - val.createdAt > 10 * 60 * 1000) {
+      digiLockerStates.delete(key);
+    }
+  }
+
+  const authUrl = `${DIGILOCKER_AUTH_URL}?response_type=code&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+
+  res.redirect(authUrl);
+};
+
+// @desc    DigiLocker OAuth callback — exchange code, fetch profile, login student
+// @route   GET /api/auth/digilocker/callback
+// @access  Public (called by DigiLocker redirect)
+exports.digiLockerCallback = async (req, res) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
+  try {
+    const { code, state, error: dlError, error_description } = req.query;
+
+    // DigiLocker returned an error
+    if (dlError) {
+      console.error('DigiLocker auth error:', dlError, error_description);
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent(error_description || dlError)}`);
+    }
+
+    // Validate code and state
+    if (!code || !state) {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('Missing authorization code or state parameter')}`);
+    }
+
+    // Verify state to prevent CSRF
+    if (!digiLockerStates.has(state)) {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('Invalid or expired state. Please try again.')}`);
+    }
+    digiLockerStates.delete(state);
+
+    // Exchange authorization code for access token
+    const tokenResponse = await axios.post(
+      DIGILOCKER_TOKEN_URL,
+      new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: process.env.DIGILOCKER_REDIRECT_URI,
+        client_id: process.env.DIGILOCKER_CLIENT_ID,
+        client_secret: process.env.DIGILOCKER_CLIENT_SECRET,
+      }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      }
+    );
+
+    const { access_token } = tokenResponse.data;
+    if (!access_token) {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('Failed to obtain access token from DigiLocker')}`);
+    }
+
+    // Fetch user profile from DigiLocker
+    const profileResponse = await axios.get(DIGILOCKER_USER_URL, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const dlProfile = profileResponse.data;
+    // DigiLocker profile typically has: digilockerid, name, dob, gender, mobile, email, eaadhaar
+    const dlEmail = dlProfile.email;
+    const dlName = dlProfile.name;
+    const dlDigiLockerId = dlProfile.digilockerid;
+
+    if (!dlEmail && !dlDigiLockerId) {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('DigiLocker did not return sufficient identity data')}`);
+    }
+
+    // Find existing student user by email (or digilockerid stored on user)
+    let user = null;
+    if (dlEmail) {
+      user = await User.findOne({ email: dlEmail.toLowerCase(), role: 'student' });
+    }
+
+    if (!user) {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('No student account found with this DigiLocker email. Please register first with the same email, then connect DigiLocker.')}`);
+    }
+
+    if (user.status === 'suspended') {
+      return res.redirect(`${clientUrl}/login/student?digilocker_error=${encodeURIComponent('Your account has been suspended. Please contact support.')}`);
+    }
+
+    // Issue C2C JWT token for the student
+    const token = generateToken(user._id, user.role);
+
+    // Redirect to frontend with token
+    res.redirect(`${clientUrl}/login/student?digilocker_token=${token}`);
+  } catch (error) {
+    console.error('DigiLocker callback error:', error.response?.data || error.message);
+    const errMsg = error.response?.data?.error_description || error.response?.data?.message || 'DigiLocker authentication failed. Please try again.';
+    const clientUrl2 = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${clientUrl2}/login/student?digilocker_error=${encodeURIComponent(errMsg)}`);
   }
 };

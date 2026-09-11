@@ -59,6 +59,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login using a pre-issued token (e.g. from DigiLocker OAuth callback)
+  const loginWithToken = async (token) => {
+    try {
+      localStorage.setItem('c2c_token', token);
+      const res = await authService.getMe();
+      if (res.success) {
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        localStorage.setItem('c2c_user_role', res.user.role);
+        setUser(res.user);
+        setRoleDetails(res.roleDetails);
+        return { success: true, role: res.user.role, user: res.user };
+      }
+      localStorage.removeItem('c2c_token');
+      return { success: false, message: 'Failed to verify token' };
+    } catch (err) {
+      localStorage.removeItem('c2c_token');
+      return { success: false, message: err.response?.data?.message || 'Token verification failed' };
+    }
+  };
+
   const register = async (role, data) => {
     try {
       let res;
@@ -114,6 +134,7 @@ export const AuthProvider = ({ children }) => {
         roleDetails,
         loading,
         login,
+        loginWithToken,
         register,
         logout,
         updateProfile,
