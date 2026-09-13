@@ -36,11 +36,11 @@ exports.sendSMSOTP = async (phone, otp) => {
   const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
 
   if (!apiKey || apiKey === 'YOUR_OTP_API_KEY_HERE') {
-    console.warn('⚠️ [OTP SERVICE] OTP_API_KEY is not configured in server/.env.');
-    return { success: false, message: 'OTP_API_KEY not set in server/.env' };
+    throw new Error('SMS OTP service is not configured. Set OTP_API_KEY before enabling student login.');
   }
 
-  // 1. Try Fast2SMS Gateway (standard route: 'otp')
+  // Fast2SMS OTP gateway. A failed dispatch must fail the login request; an OTP
+  // that never reached the phone is not a valid authentication factor.
   try {
     const fast2smsRes = await axios.post(
       'https://www.fast2sms.com/dev/bulkV2',
@@ -62,22 +62,10 @@ exports.sendSMSOTP = async (phone, otp) => {
       console.log(`✅ [SMS OTP] Fast2SMS dispatched successfully to +91 ${cleanPhone}`);
       return { success: true, provider: 'Fast2SMS', data: fast2smsRes.data };
     }
-  } catch (fastErr) {
-    // 2. Fallback to 2Factor SMS Gateway
-    try {
-      const twoFactorRes = await axios.get(
-        `https://2factor.in/API/V1/${encodeURIComponent(apiKey)}/SMS/${cleanPhone}/${otp}/Campus2Career`,
-        { timeout: 10000 }
-      );
-      if (twoFactorRes.data && twoFactorRes.data.Status === 'Success') {
-        console.log(`✅ [SMS OTP] 2Factor dispatched successfully to +91 ${cleanPhone}`);
-        return { success: true, provider: '2Factor', data: twoFactorRes.data };
-      }
-    } catch (twoErr) {
-      console.error('❌ [SMS OTP] SMS Gateway Error:', fastErr.response?.data || fastErr.message, twoErr.response?.data || twoErr.message);
-      return { success: false, error: fastErr.response?.data || fastErr.message };
-    }
+  } catch (error) {
+    console.error('❌ [SMS OTP] Fast2SMS dispatch failed:', error.response?.data || error.message);
+    throw new Error('Unable to send SMS OTP. Please try again later.');
   }
 
-  return { success: true };
+  throw new Error('SMS provider rejected the OTP request.');
 };

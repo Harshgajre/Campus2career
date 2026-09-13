@@ -29,8 +29,13 @@ const otpSchema = new mongoose.Schema(
       required: true,
       index: { expires: 0 },
     },
+    attempts: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Otp', otpSchema);
+module.exports = mongoose.models.Otp || mongoose.model('Otp', otpSchema);

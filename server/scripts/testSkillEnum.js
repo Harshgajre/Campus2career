@@ -11,6 +11,12 @@ const testSkillEnum = async () => {
   console.log('✅ Connected to MongoDB Atlas');
 
   try {
+    // Isolated test identity; clean up a previous interrupted run only.
+    const priorUser = await User.findOne({ email: 'enumtest@example.com', role: 'student' });
+    if (priorUser) {
+      await Student.deleteMany({ user: priorUser._id });
+      await User.deleteOne({ _id: priorUser._id });
+    }
     // 1. Test skill categorizer outputs
     const testCases = [
       { skill: 'React.js', expected: 'Frontend' },
@@ -55,6 +61,7 @@ const testSkillEnum = async () => {
       user: testUser._id,
       phone: '9998887776',
       rollNumber: 'ENUM-001',
+      collegeName: 'Enum Test College',
       skills: testSkills,
     });
 

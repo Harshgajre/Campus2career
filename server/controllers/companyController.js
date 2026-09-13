@@ -6,6 +6,7 @@ const Interview = require('../models/Interview');
 const Internship = require('../models/Internship');
 const Student = require('../models/Student');
 const Notification = require('../models/Notification');
+const ChallengeSubmission = require('../models/ChallengeSubmission');
 
 // @desc    Get Company Dashboard Data (Exact metrics from Reference Image)
 // @route   GET /api/companies/dashboard
@@ -97,9 +98,12 @@ exports.createOpportunity = async (req, res, next) => {
     const company = await Company.findOne({ user: req.user.id });
     if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
 
+    if (!title?.trim() || !description?.trim()) {
+      return res.status(400).json({ success: false, message: 'Title and description are required' });
+    }
     const reqSkills = Array.isArray(requiredSkills)
       ? requiredSkills
-      : requiredSkills ? requiredSkills.split(',').map((s) => s.trim()) : ['React', 'JavaScript'];
+      : requiredSkills ? requiredSkills.split(',').map((s) => s.trim()).filter(Boolean) : [];
 
     const prefSkills = Array.isArray(preferredSkills)
       ? preferredSkills
@@ -110,15 +114,15 @@ exports.createOpportunity = async (req, res, next) => {
       companyName: company.companyName,
       title,
       type: type || 'Internship',
-      location: location || 'Bangalore / Remote',
+      location: location || '',
       locationType: locationType || 'Hybrid',
-      stipend: stipend || '₹35,000 / mo',
-      duration: duration || '6 Months',
-      deadline: deadline || '10d left',
+      stipend: stipend || '',
+      duration: duration || '',
+      deadline: deadline || '',
       requiredSkills: reqSkills,
       preferredSkills: prefSkills,
-      description: description || 'Exciting role with fast-growing engineering teams.',
-      openingsCount: openingsCount || 2,
+      description: description.trim(),
+      openingsCount: openingsCount || 1,
       status: 'open',
     });
 
@@ -128,14 +132,15 @@ exports.createOpportunity = async (req, res, next) => {
   }
 };
 
-// @desc    Search Candidates & Talent Pool (real registered students)
+// @desc    Search candidates who have applied to this company only
 // @route   GET /api/companies/candidates
 // @access  Private (Company)
 exports.searchCandidates = async (req, res, next) => {
   try {
-    const students = await Student.find()
-      .populate('user', 'name email avatar phone')
-      .lean();
+    const company = await Company.findOne({ user: req.user.id });
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
+    const applications = await Application.find({ company: company._id }).populate({ path: 'student', populate: { path: 'user', select: 'name email avatar phone' } }).lean();
+    const students = applications.map((application) => application.student).filter(Boolean);
 
     const candidates = students
       .filter(s => s.user) // only students with a linked user
@@ -160,7 +165,7 @@ exports.searchCandidates = async (req, res, next) => {
         resumeFileName: s.resumeFileName || '',
         projectsCount: 0,
         challengesWon: s.challengesCompletedCount || 0,
-        shortlisted: false,
+        shortlisted: applications.some((application) => String(application.student?._id) === String(s._id) && application.status === 'Shortlisted'),
         matchPercent: null,
       }));
 
@@ -268,7 +273,8 @@ exports.getSkillRequirements = async (req, res, next) => {
 // @access  Private (Company)
 exports.updateOpportunity = async (req, res, next) => {
   try {
-    const opportunity = await Opportunity.findById(req.params.id);
+    const company = await Company.findOne({ user: req.user.id });
+    const opportunity = company && await Opportunity.findOne({ _id: req.params.id, company: company._id });
     if (!opportunity) return res.status(404).json({ success: false, message: 'Opportunity not found' });
     const fields = ['title', 'type', 'location', 'locationType', 'stipend', 'duration', 'deadline', 'description', 'openingsCount', 'status', 'requiredSkills', 'preferredSkills'];
     fields.forEach((f) => { if (req.body[f] !== undefined) opportunity[f] = req.body[f]; });
@@ -284,7 +290,9 @@ exports.updateOpportunity = async (req, res, next) => {
 // @access  Private (Company)
 exports.deleteOpportunity = async (req, res, next) => {
   try {
-    await Opportunity.findByIdAndDelete(req.params.id);
+    const company = await Company.findOne({ user: req.user.id });
+    const opportunity = company && await Opportunity.findOneAndDelete({ _id: req.params.id, company: company._id });
+    if (!opportunity) return res.status(404).json({ success: false, message: 'Opportunity not found' });
     res.status(200).json({ success: true, message: 'Opportunity deleted' });
   } catch (error) {
     next(error);
@@ -297,7 +305,8 @@ exports.deleteOpportunity = async (req, res, next) => {
 exports.updateApplicationStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const application = await Application.findById(req.params.id);
+    const company = await Company.findOne({ user: req.user.id });
+    const application = company && await Application.findOne({ _id: req.params.id, company: company._id });
     if (!application) return res.status(404).json({ success: false, message: 'Application not found' });
     application.status = status;
     await application.save();
@@ -305,6 +314,17 @@ exports.updateApplicationStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+// @desc    View results for challenges owned by this company
+exports.getChallengeSubmissions = async (req, res, next) => {
+  try {
+    const company = await Company.findOne({ user: req.user.id });
+    if (!company) return res.status(404).json({ success: false, message: 'Company profile not found' });
+    const challengeIds = await Challenge.find({ company: company._id }).distinct('_id');
+    const submissions = await ChallengeSubmission.find({ challenge: { $in: challengeIds } }).populate('student', 'rollNumber collegeName resumeUrl resumeFileName').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, submissions });
+  } catch (error) { next(error); }
 };
 
 // @desc    Get Company Profile

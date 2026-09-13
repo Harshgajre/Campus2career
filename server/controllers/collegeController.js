@@ -4,52 +4,23 @@ const TrainingProgram = require('../models/TrainingProgram');
 const Internship = require('../models/Internship');
 const Placement = require('../models/Placement');
 const Notification = require('../models/Notification');
+const Application = require('../models/Application');
+const ChallengeSubmission = require('../models/ChallengeSubmission');
 
 // @desc    Get College Dashboard Data (Exact metrics from Reference Image)
 // @route   GET /api/colleges/dashboard
 // @access  Private (College)
 exports.getCollegeDashboard = async (req, res, next) => {
   try {
-    let college = await College.findOne({ user: req.user ? req.user.id : null });
-
-    const totalStudents = college ? college.totalStudents : 1245;
-    const activePrograms = college ? college.activePrograms : 32;
-    const internshipsCount = college ? college.internshipsCount : 85;
-    const placementsCount = college ? college.placementsCount : 62;
-
-    // Spline / Bar chart skill analytics data matching College Panel in image
-    const skillAnalytics = [
-      { skill: 'AI/ML', count: 380, averageScore: 78 },
-      { skill: 'Web Dev', count: 1120, averageScore: 89 },
-      { skill: 'DSA', count: 850, averageScore: 82 },
-      { skill: 'DBMS', count: 940, averageScore: 85 },
-      { skill: 'Cloud', count: 520, averageScore: 74 },
-    ];
-
-    // Recent Updates list (Matching Reference design items)
-    const recentUpdates = [
-      {
-        id: 'up-1',
-        title: 'New Training Program added',
-        time: '2h ago',
-        category: 'training',
-        icon: 'book-open',
-      },
-      {
-        id: 'up-2',
-        title: 'Internship Drive - TechCorp',
-        time: '1d ago',
-        category: 'internship',
-        icon: 'briefcase',
-      },
-      {
-        id: 'up-3',
-        title: 'Placement Drive - TCS',
-        time: '2d ago',
-        category: 'placement',
-        icon: 'award',
-      },
-    ];
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const students = await Student.find({ college: college._id }).select('_id skills');
+    const studentIds = students.map((student) => student._id);
+    const [activePrograms, internshipsCount, placementsCount] = await Promise.all([TrainingProgram.countDocuments({ college: college._id, status: 'active' }), Internship.countDocuments({ college: college._id }), Placement.countDocuments({ college: college._id })]);
+    const skillCounts = new Map();
+    students.forEach((student) => (student.skills || []).forEach((skill) => skillCounts.set(skill.name, (skillCounts.get(skill.name) || 0) + 1)));
+    const skillAnalytics = [...skillCounts].map(([skill, count]) => ({ skill, count, averageScore: 0 })).slice(0, 10);
+    const recentUpdates = (await Application.find({ student: { $in: studentIds } }).sort({ createdAt: -1 }).limit(5).lean()).map((application) => ({ id: application._id.toString(), title: `Application: ${application.opportunityTitle}`, time: application.createdAt, category: 'application', icon: 'briefcase' }));
 
     res.status(200).json({
       success: true,
@@ -57,10 +28,10 @@ exports.getCollegeDashboard = async (req, res, next) => {
         welcomeMessage: `Welcome Back, ${req.user.name}!`,
         subtitle: 'Monitor students and improve outcomes.',
         stats: {
-          totalStudents: { count: '1,245', numeric: totalStudents, label: 'Total Students' },
-          activePrograms: { count: '32', numeric: activePrograms, label: 'Active Programs' },
-          internships: { count: '85', numeric: internshipsCount, label: 'Internships' },
-          placements: { count: '62', numeric: placementsCount, label: 'Placements' },
+          totalStudents: { count: String(students.length), numeric: students.length, label: 'Total Students' },
+          activePrograms: { count: String(activePrograms), numeric: activePrograms, label: 'Active Programs' },
+          internships: { count: String(internshipsCount), numeric: internshipsCount, label: 'Internships' },
+          placements: { count: String(placementsCount), numeric: placementsCount, label: 'Placements' },
         },
         skillAnalytics,
         recentUpdates,
@@ -76,6 +47,12 @@ exports.getCollegeDashboard = async (req, res, next) => {
 // @access  Private (College)
 exports.getCollegeStudents = async (req, res, next) => {
   try {
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const realStudents = await Student.find({ college: college._id }).populate('user', 'name email avatar status').lean();
+    return res.status(200).json({ success: true, students: realStudents.map((student) => ({ ...student, name: student.user?.name || '', email: student.user?.email || '', avatar: student.user?.avatar || '', status: student.user?.status || '', topSkills: (student.skills || []).slice(0, 4).map((skill) => skill.name), verifiedSkillsCount: (student.skills || []).filter((skill) => skill.verified).length })) });
+
+    /* Legacy static roster below is unreachable. */
     const students = [
       {
         _id: 'stu-1',
@@ -320,11 +297,16 @@ exports.createTrainingProgram = async (req, res, next) => {
   try {
     const { title, description, skillsCovered, department, trainerName, startDate, endDate, maxCapacity } = req.body;
 
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+
     const skillsArray = Array.isArray(skillsCovered)
       ? skillsCovered
       : skillsCovered ? skillsCovered.split(',').map((s) => s.trim()) : ['Cloud', 'DevOps'];
 
     const program = await TrainingProgram.create({
+      college: college._id,
+      collegeName: college.institutionName,
       title,
       description,
       skillsCovered: skillsArray,
@@ -418,22 +400,35 @@ exports.getCollegePlacements = async (req, res, next) => {
 // @access  Private (College)
 exports.getCollegeInternships = async (req, res, next) => {
   try {
-    let college = await College.findOne({ user: req.user.id });
-    let internships = [];
-    if (college) {
-      internships = await Internship.find({ college: college._id }).sort({ createdAt: -1 });
-    }
-    if (internships.length === 0) {
-      internships = [
-        { _id: 'int-c1', studentName: 'Harsh Gajre', companyName: 'TechCorp Solutions', role: 'Frontend Developer Intern', startDate: '2026-06-01', endDate: '2026-12-01', stipend: '₹35,000 / month', status: 'Active', mentor: 'Siddharth Rao', progressPercentage: 65 },
-        { _id: 'int-c2', studentName: 'Priya Singh', companyName: 'DesignStudio', role: 'UI/UX Design Intern', startDate: '2026-07-01', endDate: '2026-12-31', stipend: '₹28,000 / month', status: 'Active', mentor: 'Riya Patel', progressPercentage: 50 },
-        { _id: 'int-c3', studentName: 'Dev Mehta', companyName: 'CodeSoft Global', role: 'Backend Developer Intern', startDate: '2026-05-15', endDate: '2026-11-15', stipend: '₹30,000 / month', status: 'Active', mentor: 'Sanjay Deshmukh', progressPercentage: 78 },
-      ];
-    }
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const internships = await Internship.find({ college: college._id }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, internships });
   } catch (error) {
     next(error);
   }
+};
+
+// @desc    Applications for students belonging to the authenticated college
+exports.getCollegeApplications = async (req, res, next) => {
+  try {
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const studentIds = await Student.find({ college: college._id }).distinct('_id');
+    const applications = await Application.find({ student: { $in: studentIds } }).populate('student opportunity company').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, applications });
+  } catch (error) { next(error); }
+};
+
+// @desc    Challenge results for students belonging to the authenticated college
+exports.getCollegeChallengeResults = async (req, res, next) => {
+  try {
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) return res.status(404).json({ success: false, message: 'College profile not found' });
+    const studentIds = await Student.find({ college: college._id }).distinct('_id');
+    const submissions = await ChallengeSubmission.find({ student: { $in: studentIds } }).populate('challenge student').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, submissions });
+  } catch (error) { next(error); }
 };
 
 // @desc    Get College Profile

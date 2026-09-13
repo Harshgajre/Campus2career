@@ -8,14 +8,19 @@ export const AuthProvider = ({ children }) => {
   const [roleDetails, setRoleDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const clearStoredSession = () => {
+    localStorage.removeItem('c2c_token');
+    localStorage.removeItem('c2c_user');
+    localStorage.removeItem('c2c_user_role');
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('c2c_token');
-      const savedUser = localStorage.getItem('c2c_user');
-
-      if (token && savedUser) {
+      if (token) {
         try {
-          setUser(JSON.parse(savedUser));
+          // The token is the sole source of identity. Never hydrate UI identity
+          // from a previous browser user's cached profile.
           const res = await authService.getMe();
           if (res.success) {
             setUser(res.user);
@@ -23,9 +28,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('c2c_user', JSON.stringify(res.user));
           }
         } catch (error) {
-          localStorage.removeItem('c2c_token');
-          localStorage.removeItem('c2c_user');
-          localStorage.removeItem('c2c_user_role');
+          clearStoredSession();
           setUser(null);
           setRoleDetails(null);
         }
@@ -70,6 +73,9 @@ export const AuthProvider = ({ children }) => {
 
   const studentLoginInit = async (email, password) => {
     try {
+      clearStoredSession();
+      setUser(null);
+      setRoleDetails(null);
       const res = await authService.studentLoginInit({ email, password });
       return res;
     } catch (err) {
@@ -81,6 +87,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authService.studentLoginVerify({ email, password, otp });
       if (res.success) {
+        if (role === 'student') {
+          // Students receive no authenticated session until their SMS OTP is verified.
+          return { success: true, role: 'student', requiresLogin: true };
+        }
         localStorage.setItem('c2c_token', res.token);
         localStorage.setItem('c2c_user', JSON.stringify(res.user));
         localStorage.setItem('c2c_user_role', res.user.role);
@@ -144,9 +154,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('c2c_token');
-    localStorage.removeItem('c2c_user');
-    localStorage.removeItem('c2c_user_role');
+    clearStoredSession();
     sessionStorage.removeItem('c2c_token');
     sessionStorage.removeItem('c2c_user');
     sessionStorage.removeItem('c2c_user_role');
@@ -163,9 +171,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      setUser((prev) => ({ ...prev, ...updatedData }));
-      localStorage.setItem('c2c_user', JSON.stringify({ ...user, ...updatedData }));
-      return { success: true };
+      return { success: false, message: err.response?.data?.message || 'Profile update failed' };
     }
   };
 

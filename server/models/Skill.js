@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { SKILL_CATEGORIES } = require('../utils/skillCategories');
 
 const skillSchema = new mongoose.Schema(
   {
@@ -10,7 +11,7 @@ const skillSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Frontend', 'Backend', 'Database', 'Tools'],
+      enum: SKILL_CATEGORIES,
       default: 'Frontend',
     },
     description: { type: String, default: '' },

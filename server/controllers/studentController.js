@@ -4,8 +4,10 @@ const Project = require('../models/Project');
 const Opportunity = require('../models/Opportunity');
 const Application = require('../models/Application');
 const Challenge = require('../models/Challenge');
+const ChallengeSubmission = require('../models/ChallengeSubmission');
 const Notification = require('../models/Notification');
 const { categorizeSkill } = require('../utils/skillCategorizer');
+const { SKILL_CATEGORIES } = require('../utils/skillCategories');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -101,7 +103,7 @@ exports.getStudentDashboard = async (req, res, next) => {
 
     const skillsCount = student.skills.length;
     const projectsCount = await Project.countDocuments({ student: student._id });
-    const challengesCount = student.challengesCompletedCount || 0;
+    const challengesCount = await ChallengeSubmission.countDocuments({ student: student._id });
     const activeApplicationsCount = await Application.countDocuments({
       student: student._id,
       status: { $in: ['Applied', 'Under Review', 'Shortlisted', 'Interview Scheduled'] },
@@ -244,7 +246,7 @@ exports.addStudentSkill = async (req, res, next) => {
       });
     }
 
-    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+    const validCategories = SKILL_CATEGORIES;
     let assignedCategory = category;
     if (!validCategories.includes(assignedCategory)) {
       assignedCategory = categorizeSkill(name);
@@ -283,7 +285,7 @@ exports.updateStudentSkill = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Skill item not found' });
     }
 
-    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+    const validCategories = SKILL_CATEGORIES;
     if (name) skill.name = name.trim();
     if (category) {
       skill.category = validCategories.includes(category) ? category : categorizeSkill(name || skill.name);

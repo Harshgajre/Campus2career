@@ -22,28 +22,28 @@ exports.submitChallengeSolution = async (req, res, next) => {
     const { id } = req.params;
     const { codeRepoUrl, liveDemoUrl, submissionNotes } = req.body;
 
-    let student = await Student.findOne({ user: req.user.id });
-    if (!student) {
-      student = await Student.create({ user: req.user.id });
-    }
+    if (req.user.role !== 'student') return res.status(403).json({ success: false, message: 'Only students can submit challenge solutions' });
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ success: false, message: 'Student profile not found' });
 
     const challenge = await Challenge.findById(id);
+    if (!challenge || challenge.status !== 'active') return res.status(404).json({ success: false, message: 'Active challenge not found' });
+    const existing = await ChallengeSubmission.findOne({ challenge: challenge._id, student: student._id });
+    if (existing) return res.status(400).json({ success: false, message: 'You have already submitted a solution for this challenge' });
 
     const submission = await ChallengeSubmission.create({
-      challenge: id,
+      challenge: challenge._id,
       student: student._id,
       studentName: req.user.name,
-      challengeTitle: challenge ? challenge.title : 'Skill Challenge',
+      challengeTitle: challenge.title,
       codeRepoUrl,
       liveDemoUrl: liveDemoUrl || '',
       submissionNotes: submissionNotes || '',
       status: 'Submitted',
     });
 
-    if (challenge) {
-      challenge.participantsCount += 1;
-      await challenge.save();
-    }
+    challenge.participantsCount += 1;
+    await challenge.save();
 
     res.status(201).json({ success: true, message: 'Challenge solution submitted successfully!', submission });
   } catch (error) {

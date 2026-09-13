@@ -61,7 +61,7 @@ export const RegisterStudentPage = () => {
     }
     const res = await register('student', registrationData);
     setLoading(false);
-    if (res.success) navigate('/student/dashboard');
+    if (res.success) navigate('/login/student');
     else setError(res.message || 'Registration failed');
   };
 

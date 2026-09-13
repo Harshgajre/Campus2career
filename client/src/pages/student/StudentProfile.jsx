@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { studentService } from '../../services/roleServices';
-import { useAuth } from '../../context/AuthContext';
 import {
   User,
   Mail,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 
 export const StudentProfile = () => {
-  const { user } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,10 +48,9 @@ export const StudentProfile = () => {
   }
 
   // Real data from DB — passport API returns fresh MongoDB values
-  const studentName = profileData?.studentName || user?.name || '—';
-  const email = profileData?.email || user?.email || '—';
-  // phone is stored on User model; passport API populates it — prefer DB value over cached context
-  const phone = profileData?.phone || user?.phone || '—';
+  const studentName = profileData?.studentName || '—';
+  const email = profileData?.email || '—';
+  const phone = profileData?.phone || '—';
   // rollNumber is stored on Student model and returned directly
   const rollNumber = profileData?.rollNumber || '—';
   const collegeName = profileData?.collegeName || '—';

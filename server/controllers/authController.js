@@ -6,6 +6,7 @@ const Otp = require('../models/Otp');
 const generateToken = require('../utils/generateToken');
 const { extractTextFromFile, parseResumeData } = require('../utils/resumeParser');
 const { categorizeSkill } = require('../utils/skillCategorizer');
+const { SKILL_CATEGORIES } = require('../utils/skillCategories');
 const { generateOTP, hashOTP, verifyOTPHash, sendSMSOTP } = require('../utils/otpService');
 
 // @desc    Parse Resume PDF/DOCX
@@ -86,21 +87,23 @@ exports.registerStudent = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please provide a valid GitHub profile URL (e.g. https://github.com/username)' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    const normalizedEmail = email.toLowerCase().trim();
+    // Query the same User model and role that registration creates.  Do not
+    // inspect local storage, seed data, or unrelated role profiles.
+    const existingUser = await User.findOne({ email: normalizedEmail, role: 'student' });
     if (existingUser) {
-      const existingStudentProfile = await Student.findOne({ user: existingUser._id });
-      const existingCollegeProfile = await College.findOne({ user: existingUser._id });
-      const existingCompanyProfile = await Company.findOne({ user: existingUser._id });
-      if (existingStudentProfile || existingCollegeProfile || existingCompanyProfile) {
-        return res.status(400).json({ success: false, message: 'User already exists with this email' });
-      }
-      // If orphaned user with no profile exists, remove it to allow fresh registration
-      await User.deleteOne({ _id: existingUser._id });
+      return res.status(400).json({ success: false, message: 'A student account already exists with this email' });
     }
+
+    if (!resumeUrl || !resumeFileName) {
+      return res.status(400).json({ success: false, message: 'Please upload a PDF or DOCX resume' });
+    }
+
+    const college = await College.findOne({ institutionName: { $regex: `^${cleanCollegeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } });
 
     const user = await User.create({
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password,
       phone: cleanPhone,
       role: 'student',
@@ -108,7 +111,7 @@ exports.registerStudent = async (req, res, next) => {
     });
 
     try {
-      const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+      const validCategories = SKILL_CATEGORIES;
       let formattedSkills = [];
       if (Array.isArray(skills) && skills.length > 0 && typeof skills[0] === 'object') {
         formattedSkills = skills.map(s => ({
@@ -139,6 +142,7 @@ exports.registerStudent = async (req, res, next) => {
         rollNumber: cleanRollNumber,
         department: cleanDepartment,
         semester: semester || 6,
+        college: college?._id,
         collegeName: cleanCollegeName,
         skills: formattedSkills,
         overallProgress: 0,
@@ -149,11 +153,9 @@ exports.registerStudent = async (req, res, next) => {
         extractedResumeData: extractedResumeData || {},
       });
 
-      const token = generateToken(user._id, user.role);
-
       return res.status(201).json({
         success: true,
-        token,
+        message: 'Registration complete. Sign in with email, password, and the SMS OTP sent to your registered phone.',
         user: {
           id: user._id,
           name: user.name,
@@ -181,6 +183,10 @@ exports.registerCollege = async (req, res, next) => {
   try {
     const { name, email, password, institutionName, code, university, state, city } = req.body;
 
+    if (!name?.trim() || !email?.trim() || !password || !institutionName?.trim() || !code?.trim()) {
+      return res.status(400).json({ success: false, message: 'College name, email, password, and AISHE/College Code are required' });
+    }
+
     const userExists = await User.findOne({ email: email.toLowerCase().trim(), role: 'college' });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'A college account already exists with this email' });
@@ -203,6 +209,11 @@ exports.registerCollege = async (req, res, next) => {
       city: city || 'Pune',
       contactPerson: name || 'Dr. Mehta',
     });
+
+    await Student.updateMany(
+      { college: { $exists: false }, collegeName: { $regex: `^${institutionName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } },
+      { $set: { college: college._id } }
+    );
 
     const token = generateToken(user._id, user.role);
 
@@ -229,6 +240,10 @@ exports.registerCollege = async (req, res, next) => {
 exports.registerCompany = async (req, res, next) => {
   try {
     const { name, email, password, companyName, gstNumber, industryType, location, website } = req.body;
+
+    if (!name?.trim() || !email?.trim() || !password || !companyName?.trim()) {
+      return res.status(400).json({ success: false, message: 'Company name, email, password, and recruiter name are required' });
+    }
 
     if (!gstNumber || !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(gstNumber.trim().toUpperCase())) {
       return res.status(400).json({ success: false, message: 'Please provide a valid 15-character GST Number (e.g. 22AAAAA0000A1Z5)' });
@@ -287,16 +302,9 @@ exports.studentLoginInit = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim(), role: 'student' }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
-    }
-
-    if (user.role !== 'student') {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is not registered as a Student. Please use the correct login portal.',
-      });
     }
 
     const isMatch = await user.matchPassword(password);
@@ -332,8 +340,12 @@ exports.studentLoginInit = async (req, res, next) => {
       expiresAt,
     });
 
-    // Send real SMS OTP via SMS API
-    await sendSMSOTP(user.phone, otp);
+    try {
+      await sendSMSOTP(user.phone, otp);
+    } catch (smsError) {
+      await Otp.deleteMany({ userId: user._id });
+      throw smsError;
+    }
 
     const maskedPhone = `******${user.phone.slice(-4)}`;
 
@@ -365,8 +377,8 @@ exports.studentLoginVerify = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Please enter a valid 6-digit OTP' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
-    if (!user || user.role !== 'student') {
+    const user = await User.findOne({ email: email.toLowerCase().trim(), role: 'student' }).select('+password');
+    if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid student credentials' });
     }
 
@@ -399,8 +411,14 @@ exports.studentLoginVerify = async (req, res, next) => {
       });
     }
 
+    if (otpRecord.attempts >= 5) {
+      await Otp.deleteOne({ _id: otpRecord._id });
+      return res.status(429).json({ success: false, message: 'Too many invalid OTP attempts. Please request a new OTP.' });
+    }
+
     const isOtpValid = verifyOTPHash(cleanOtp, otpRecord.otpHash);
     if (!isOtpValid) {
+      await Otp.updateOne({ _id: otpRecord._id }, { $inc: { attempts: 1 } });
       return res.status(401).json({
         success: false,
         message: 'Invalid OTP code. Please enter the correct 6-digit code sent to your phone.',
@@ -445,8 +463,8 @@ exports.resendStudentOTP = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
-    if (!user || user.role !== 'student') {
+    const user = await User.findOne({ email: email.toLowerCase().trim(), role: 'student' }).select('+password');
+    if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid student credentials' });
     }
 
@@ -468,7 +486,12 @@ exports.resendStudentOTP = async (req, res, next) => {
       expiresAt,
     });
 
-    await sendSMSOTP(user.phone, otp);
+    try {
+      await sendSMSOTP(user.phone, otp);
+    } catch (smsError) {
+      await Otp.deleteMany({ userId: user._id });
+      throw smsError;
+    }
 
     const maskedPhone = `******${user.phone.slice(-4)}`;
     res.status(200).json({

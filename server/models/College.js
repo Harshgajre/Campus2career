@@ -10,12 +10,8 @@ const collegeSchema = new mongoose.Schema(
     institutionName: {
       type: String,
       required: true,
-      default: 'Apex Institute of Technology',
     },
-    code: {
-      type: String,
-      default: 'AIT-4110',
-    },
+    code: { type: String, required: true, trim: true },
     university: {
       type: String,
       default: 'State Technological University',
@@ -30,10 +26,10 @@ const collegeSchema = new mongoose.Schema(
       enum: ['approved', 'pending', 'rejected'],
       default: 'approved',
     },
-    totalStudents: { type: Number, default: 1245 },
-    activePrograms: { type: Number, default: 32 },
-    internshipsCount: { type: Number, default: 85 },
-    placementsCount: { type: Number, default: 62 },
+    totalStudents: { type: Number, default: 0 },
+    activePrograms: { type: Number, default: 0 },
+    internshipsCount: { type: Number, default: 0 },
+    placementsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

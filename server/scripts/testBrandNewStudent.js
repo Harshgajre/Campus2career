@@ -28,6 +28,10 @@ const testBrandNewStudent = async () => {
     collegeName: 'National Institute of Technology',
     department: 'Computer Science',
     githubUrl: 'https://github.com/brandnewstudent',
+    // Registration verifies that a processed PDF/DOCX reference is present;
+    // the test never exposes this file as an authenticated resource.
+    resumeUrl: '/uploads/registration-test-resume.pdf',
+    resumeFileName: 'registration-test-resume.pdf',
     skills: [
       { name: 'React', category: 'Frontend' },
       { name: 'Node.js', category: 'Backend' },

@@ -17,6 +17,7 @@ const {
   updateCompanyProfile,
   getCompanyChallenges,
   createChallenge,
+  getChallengeSubmissions,
 } = require('../controllers/companyController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/roleMiddleware');
@@ -35,6 +36,7 @@ router.get('/shortlisted', getShortlistedCandidates);
 router.get('/skill-requirements', getSkillRequirements);
 router.get('/challenges', getCompanyChallenges);
 router.post('/challenges', createChallenge);
+router.get('/challenge-submissions', getChallengeSubmissions);
 router.get('/interviews', getCompanyInterviews);
 router.post('/interviews', scheduleInterview);
 router.get('/interns', getActiveInterns);

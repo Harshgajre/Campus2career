@@ -5,6 +5,7 @@ const Company = require('../models/Company');
 const Opportunity = require('../models/Opportunity');
 const Skill = require('../models/Skill');
 const Challenge = require('../models/Challenge');
+const { SKILL_CATEGORIES } = require('../utils/skillCategories');
 
 // @desc    Get Admin Dashboard Data (Exact metrics from Reference Image)
 // @route   GET /api/admin/dashboard
@@ -273,12 +274,13 @@ exports.getAdminSkills = async (req, res, next) => {
 exports.createAdminSkill = async (req, res, next) => {
   try {
     const { name, category, demandLevel, industryDemandPercent, description } = req.body;
-    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
-    const assignedCategory = validCategories.includes(category) ? category : 'Frontend';
+    if (!SKILL_CATEGORIES.includes(category)) {
+      return res.status(400).json({ success: false, message: `Category must be one of: ${SKILL_CATEGORIES.join(', ')}` });
+    }
 
     const skill = await Skill.create({
       name,
-      category: assignedCategory,
+      category,
       demandLevel: demandLevel || 'High',
       industryDemandPercent: industryDemandPercent || 80,
       description: description || '',

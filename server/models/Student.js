@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+const { SKILL_CATEGORIES } = require('../utils/skillCategories');
 
 const skillItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: {
     type: String,
-    enum: ['Frontend', 'Backend', 'Database', 'Tools'],
+    enum: SKILL_CATEGORIES,
     default: 'Frontend',
   },
   level: {
@@ -28,9 +29,9 @@ const studentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'College',
     },
-    collegeName: { type: String, default: 'MIT Institute of Technology' },
-    phone: { type: String, default: '' },
-    rollNumber: { type: String, default: '' },
+    collegeName: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, match: [/^\d{10}$/, 'Phone must be exactly 10 digits'] },
+    rollNumber: { type: String, required: true, trim: true },
     department: {
       type: String,
       enum: ['Computer Science', 'Information Technology', 'AI & Data Science', 'Electronics', 'Mechanical', 'Other'],
@@ -66,12 +67,14 @@ const studentSchema = new mongoose.Schema(
       experience: [mongoose.Schema.Types.Mixed],
       certifications: [mongoose.Schema.Types.Mixed],
     },
-    passportId: { type: String, default: 'C2C-PASSPORT-2026-HG01' },
-    challengesCompletedCount: { type: Number, default: 8 },
-    projectsCompletedCount: { type: Number, default: 5 },
-    applicationsCount: { type: Number, default: 3 },
+    passportId: { type: String, default: '' },
+    challengesCompletedCount: { type: Number, default: 0 },
+    projectsCompletedCount: { type: Number, default: 0 },
+    applicationsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+
+studentSchema.index({ user: 1 }, { unique: true });
 
 module.exports = mongoose.models.Student || mongoose.model('Student', studentSchema);

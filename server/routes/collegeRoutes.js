@@ -12,6 +12,8 @@ const {
   getCollegeInternships,
   getCollegeProfile,
   updateCollegeProfile,
+  getCollegeApplications,
+  getCollegeChallengeResults,
 } = require('../controllers/collegeController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/roleMiddleware');
@@ -27,6 +29,8 @@ router.get('/training-programs', getTrainingPrograms);
 router.post('/training-programs', createTrainingProgram);
 router.get('/collaborations', getIndustryCollaborations);
 router.get('/internships', getCollegeInternships);
+router.get('/applications', getCollegeApplications);
+router.get('/challenge-results', getCollegeChallengeResults);
 router.get('/placements', getCollegePlacements);
 
 module.exports = router;
