@@ -10,7 +10,7 @@ const skillSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Frontend', 'Backend', 'Data Science & AI', 'DevOps & Cloud', 'Core CS', 'Mobile', 'UI/UX', 'Cybersecurity', 'Other'],
+      enum: ['Frontend', 'Backend', 'Database', 'Tools'],
       default: 'Frontend',
     },
     description: { type: String, default: '' },
@@ -26,4 +26,4 @@ const skillSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Skill', skillSchema);
+module.exports = mongoose.models.Skill || mongoose.model('Skill', skillSchema);

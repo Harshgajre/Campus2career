@@ -252,12 +252,12 @@ exports.getAdminSkills = async (req, res, next) => {
       skills = [
         { _id: 'sk-1', name: 'React.js', category: 'Frontend', demandLevel: 'Very High', industryDemandPercent: 94, activeStudentsCount: 1120 },
         { _id: 'sk-2', name: 'Node.js & Express', category: 'Backend', demandLevel: 'Very High', industryDemandPercent: 91, activeStudentsCount: 940 },
-        { _id: 'sk-3', name: 'Python & AI/ML', category: 'Data Science & AI', demandLevel: 'Very High', industryDemandPercent: 95, activeStudentsCount: 820 },
-        { _id: 'sk-4', name: 'Docker & Kubernetes', category: 'DevOps & Cloud', demandLevel: 'High', industryDemandPercent: 88, activeStudentsCount: 520 },
-        { _id: 'sk-5', name: 'Data Structures & Algorithms', category: 'Core CS', demandLevel: 'Very High', industryDemandPercent: 96, activeStudentsCount: 1250 },
-        { _id: 'sk-6', name: 'Figma UI/UX Prototyping', category: 'UI/UX', demandLevel: 'High', industryDemandPercent: 82, activeStudentsCount: 450 },
+        { _id: 'sk-3', name: 'Python & AI/ML', category: 'Backend', demandLevel: 'Very High', industryDemandPercent: 95, activeStudentsCount: 820 },
+        { _id: 'sk-4', name: 'Docker & Kubernetes', category: 'Tools', demandLevel: 'High', industryDemandPercent: 88, activeStudentsCount: 520 },
+        { _id: 'sk-5', name: 'Data Structures & Algorithms', category: 'Backend', demandLevel: 'Very High', industryDemandPercent: 96, activeStudentsCount: 1250 },
+        { _id: 'sk-6', name: 'Figma UI/UX Prototyping', category: 'Frontend', demandLevel: 'High', industryDemandPercent: 82, activeStudentsCount: 450 },
         { _id: 'sk-7', name: 'TypeScript', category: 'Frontend', demandLevel: 'Very High', industryDemandPercent: 89, activeStudentsCount: 680 },
-        { _id: 'sk-8', name: 'PostgreSQL & Database Design', category: 'Backend', demandLevel: 'High', industryDemandPercent: 85, activeStudentsCount: 760 },
+        { _id: 'sk-8', name: 'PostgreSQL & Database Design', category: 'Database', demandLevel: 'High', industryDemandPercent: 85, activeStudentsCount: 760 },
       ];
     }
 
@@ -273,9 +273,12 @@ exports.getAdminSkills = async (req, res, next) => {
 exports.createAdminSkill = async (req, res, next) => {
   try {
     const { name, category, demandLevel, industryDemandPercent, description } = req.body;
+    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+    const assignedCategory = validCategories.includes(category) ? category : 'Frontend';
+
     const skill = await Skill.create({
       name,
-      category: category || 'Frontend',
+      category: assignedCategory,
       demandLevel: demandLevel || 'High',
       industryDemandPercent: industryDemandPercent || 80,
       description: description || '',

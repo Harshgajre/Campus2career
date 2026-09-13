@@ -35,17 +35,14 @@ const buildRadarMetrics = (skills) => {
   const categoryMap = {
     'Frontend': 0,
     'Backend': 0,
-    'Data Science & AI': 0,
-    'DevOps & Cloud': 0,
-    'Core CS': 0,
-    'Mobile': 0,
-    'UI/UX': 0,
-    'Other': 0,
+    'Database': 0,
+    'Tools': 0,
   };
   const counts = { ...categoryMap };
 
   skills.forEach((sk) => {
-    const cat = sk.category || 'Other';
+    const valid = ['Frontend', 'Backend', 'Database', 'Tools'];
+    const cat = sk.category && valid.includes(sk.category) ? sk.category : categorizeSkill(sk.name);
     if (categoryMap[cat] !== undefined) {
       categoryMap[cat] += sk.score || 0;
       counts[cat] += 1;
@@ -55,10 +52,8 @@ const buildRadarMetrics = (skills) => {
   const subjectLabels = {
     'Frontend': 'Frontend',
     'Backend': 'Backend',
-    'Data Science & AI': 'Data & AI',
-    'DevOps & Cloud': 'DevOps',
-    'Core CS': 'Core CS',
-    'UI/UX': 'UI/UX',
+    'Database': 'Database',
+    'Tools': 'Tools',
   };
 
   return Object.keys(subjectLabels)
@@ -203,26 +198,32 @@ exports.getStudentSkills = async (req, res, next) => {
       } catch (_) {}
     }
 
-    // Deduplicate case-insensitively and accurately categorize
-    const seen = new Map();
+    // Deduplicate case-insensitively while preserving existing skill objects and IDs
+    const existingSkillNames = new Set(
+      (student.skills || []).map((s) => (s.name || '').toLowerCase().trim())
+    );
+
+    let hasNewSkills = false;
     Array.from(rawSkillNames).forEach((name) => {
-      const key = name.toLowerCase();
-      if (!seen.has(key)) {
-        seen.set(key, {
-          name,
+      const key = name.toLowerCase().trim();
+      if (key && !existingSkillNames.has(key)) {
+        existingSkillNames.add(key);
+        student.skills.push({
+          name: name.trim(),
           category: categorizeSkill(name),
           level: 'Intermediate',
+          verified: false,
+          score: 75,
         });
+        hasNewSkills = true;
       }
     });
 
-    const uniqueSkills = Array.from(seen.values());
+    if (hasNewSkills) {
+      await student.save();
+    }
 
-    // Save back to DB to maintain consistency
-    student.skills = uniqueSkills;
-    await student.save();
-
-    res.status(200).json({ success: true, skills: uniqueSkills });
+    res.status(200).json({ success: true, skills: student.skills });
   } catch (error) {
     next(error);
   }
@@ -243,10 +244,14 @@ exports.addStudentSkill = async (req, res, next) => {
       });
     }
 
-    const assignedCategory = category && category !== 'Other' ? category : categorizeSkill(name);
+    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+    let assignedCategory = category;
+    if (!validCategories.includes(assignedCategory)) {
+      assignedCategory = categorizeSkill(name);
+    }
 
     const newSkill = {
-      name,
+      name: name.trim(),
       category: assignedCategory,
       level: level || 'Intermediate',
     };
@@ -278,13 +283,16 @@ exports.updateStudentSkill = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Skill item not found' });
     }
 
-    if (name) skill.name = name;
-    if (category) skill.category = category;
+    const validCategories = ['Frontend', 'Backend', 'Database', 'Tools'];
+    if (name) skill.name = name.trim();
+    if (category) {
+      skill.category = validCategories.includes(category) ? category : categorizeSkill(name || skill.name);
+    }
     if (level) skill.level = level;
     if (score !== undefined) skill.score = score;
 
     await student.save();
-    res.status(200).json({ success: true, message: 'Skill updated successfully', skills: student.skills });
+    res.status(200).json({ success: true, message: 'Skill updated successfully', skill, skills: student.skills });
   } catch (error) {
     next(error);
   }
@@ -665,7 +673,13 @@ exports.uploadResume = async (req, res, next) => {
     student.resumeFileName = req.file.originalname;
     student.extractedResumeData = extractedResumeData;
     if (!student.skills.length && extractedResumeData.skills.length) {
-      student.skills = extractedResumeData.skills.map((name) => ({ name, category: 'Other', level: 'Intermediate', verified: false, score: 0 }));
+      student.skills = extractedResumeData.skills.map((name) => ({
+        name,
+        category: categorizeSkill(name),
+        level: 'Intermediate',
+        verified: false,
+        score: 0,
+      }));
     }
     await student.save();
 

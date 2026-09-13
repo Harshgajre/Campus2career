@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Please provide an email'],
-      unique: true,
       lowercase: true,
       trim: true,
       match: [
@@ -53,6 +52,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Compound unique index per role (role-isolated email uniqueness)
+userSchema.index({ email: 1, role: 1 }, { unique: true });
+
 // Encrypt password using bcrypt before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
@@ -67,4 +69,4 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

@@ -40,6 +40,15 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authService.login({ email, password, role });
       if (res.success) {
+        if (res.requireOtp) {
+          return {
+            success: true,
+            requireOtp: true,
+            message: res.message,
+            maskedPhone: res.maskedPhone,
+            email: res.email,
+          };
+        }
         if (role && res.user.role !== role) {
           return {
             success: false,
@@ -59,7 +68,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login using a pre-issued token (e.g. from DigiLocker OAuth callback)
+  const studentLoginInit = async (email, password) => {
+    try {
+      const res = await authService.studentLoginInit({ email, password });
+      return res;
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Invalid student credentials' };
+    }
+  };
+
+  const studentLoginVerify = async (email, password, otp) => {
+    try {
+      const res = await authService.studentLoginVerify({ email, password, otp });
+      if (res.success) {
+        localStorage.setItem('c2c_token', res.token);
+        localStorage.setItem('c2c_user', JSON.stringify(res.user));
+        localStorage.setItem('c2c_user_role', res.user.role);
+        setUser(res.user);
+        setRoleDetails(res.roleDetails);
+        return { success: true, role: res.user.role, user: res.user };
+      }
+      return { success: false, message: res.message || 'OTP verification failed' };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Invalid OTP code' };
+    }
+  };
+
+  const studentResendOtp = async (email, password) => {
+    try {
+      const res = await authService.studentResendOtp({ email, password });
+      return res;
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to resend OTP' };
+    }
+  };
+
   const loginWithToken = async (token) => {
     try {
       localStorage.setItem('c2c_token', token);
@@ -96,7 +139,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: res.message };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Backend is unavailable' };
+      return { success: false, message: err.response?.data?.message || 'Registration failed' };
     }
   };
 
@@ -120,7 +163,6 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      // Local update fallback
       setUser((prev) => ({ ...prev, ...updatedData }));
       localStorage.setItem('c2c_user', JSON.stringify({ ...user, ...updatedData }));
       return { success: true };
@@ -134,6 +176,9 @@ export const AuthProvider = ({ children }) => {
         roleDetails,
         loading,
         login,
+        studentLoginInit,
+        studentLoginVerify,
+        studentResendOtp,
         loginWithToken,
         register,
         logout,

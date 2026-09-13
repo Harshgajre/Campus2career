@@ -4,7 +4,7 @@ const skillItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: {
     type: String,
-    enum: ['Frontend', 'Backend', 'Data Science & AI', 'DevOps & Cloud', 'Core CS', 'Mobile', 'UI/UX', 'Other'],
+    enum: ['Frontend', 'Backend', 'Database', 'Tools'],
     default: 'Frontend',
   },
   level: {
@@ -29,6 +29,7 @@ const studentSchema = new mongoose.Schema(
       ref: 'College',
     },
     collegeName: { type: String, default: 'MIT Institute of Technology' },
+    phone: { type: String, default: '' },
     rollNumber: { type: String, default: '' },
     department: {
       type: String,
@@ -73,4 +74,4 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = mongoose.models.Student || mongoose.model('Student', studentSchema);

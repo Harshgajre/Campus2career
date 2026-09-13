@@ -141,13 +141,13 @@ const seedDatabase = async () => {
       { name: 'Tailwind CSS', category: 'Frontend', level: 'Advanced', verified: true, score: 92 },
       { name: 'Node.js', category: 'Backend', level: 'Advanced', verified: true, score: 88 },
       { name: 'Express.js', category: 'Backend', level: 'Advanced', verified: true, score: 86 },
-      { name: 'MongoDB', category: 'Backend', level: 'Intermediate', verified: true, score: 82 },
-      { name: 'Data Structures & Algorithms', category: 'Core CS', level: 'Advanced', verified: true, score: 90 },
-      { name: 'Git & GitHub', category: 'DevOps & Cloud', level: 'Expert', verified: true, score: 95 },
+      { name: 'MongoDB', category: 'Database', level: 'Intermediate', verified: true, score: 82 },
+      { name: 'Data Structures & Algorithms', category: 'Backend', level: 'Advanced', verified: true, score: 90 },
+      { name: 'Git & GitHub', category: 'Tools', level: 'Expert', verified: true, score: 95 },
       { name: 'REST APIs & GraphQL', category: 'Backend', level: 'Advanced', verified: true, score: 89 },
-      { name: 'UI/UX Prototyping (Figma)', category: 'UI/UX', level: 'Intermediate', verified: true, score: 80 },
+      { name: 'UI/UX Prototyping (Figma)', category: 'Frontend', level: 'Intermediate', verified: true, score: 80 },
       { name: 'TypeScript', category: 'Frontend', level: 'Intermediate', verified: true, score: 78 },
-      { name: 'Docker Containers', category: 'DevOps & Cloud', level: 'Beginner', verified: false, score: 65 },
+      { name: 'Docker Containers', category: 'Tools', level: 'Beginner', verified: false, score: 65 },
     ];
 
     // Create Student profile

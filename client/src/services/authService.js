@@ -5,6 +5,18 @@ export const authService = {
     const response = await API.post('/auth/login', credentials);
     return response.data;
   },
+  studentLoginInit: async (credentials) => {
+    const response = await API.post('/auth/student-login-init', credentials);
+    return response.data;
+  },
+  studentLoginVerify: async (payload) => {
+    const response = await API.post('/auth/student-login-verify', payload);
+    return response.data;
+  },
+  studentResendOtp: async (credentials) => {
+    const response = await API.post('/auth/student-resend-otp', credentials);
+    return response.data;
+  },
   registerStudent: async (data) => {
     const response = await API.post('/auth/register-student', data);
     return response.data;

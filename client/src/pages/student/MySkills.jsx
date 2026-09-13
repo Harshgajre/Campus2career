@@ -22,7 +22,7 @@ export const MySkills = () => {
     level: 'Intermediate',
   });
 
-  const categories = ['Frontend', 'Backend', 'Data Science & AI', 'DevOps & Cloud', 'Core CS', 'Mobile', 'UI/UX', 'Other'];
+  const categories = ['Frontend', 'Backend', 'Database', 'Tools'];
 
   useEffect(() => {
     loadSkills();

@@ -36,8 +36,9 @@ export const RegisterStudentPage = () => {
     event.preventDefault();
     setError('');
 
-    if (!formData.phone || !/^[6-9]\d{9}$/.test(formData.phone.trim())) {
-      setError('Please enter a valid 10-digit Indian phone number starting with 6-9');
+    const cleanPhone = formData.phone.trim();
+    if (!cleanPhone || !/^\d{10}$/.test(cleanPhone)) {
+      setError('Please enter a valid 10-digit phone number');
       return;
     }
 

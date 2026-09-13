@@ -154,11 +154,8 @@ export const ManageSkills = () => {
               >
                 <option>Frontend</option>
                 <option>Backend</option>
-                <option>Data Science & AI</option>
-                <option>DevOps & Cloud</option>
-                <option>Core CS</option>
-                <option>UI/UX</option>
-                <option>Cybersecurity</option>
+                <option>Database</option>
+                <option>Tools</option>
               </select>
             </div>
 
